@@ -79,3 +79,10 @@ cscope.*
 
 # spl ais files
 /spl/*.ais
+
+# gtags file
+GTAGS
+GSYMS
+GPATH
+GRTAGS
+

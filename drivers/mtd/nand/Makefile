@@ -38,6 +38,7 @@ COBJS-$(CONFIG_SPL_NAND_SIMPLE) += nand_spl_simple.o
 COBJS-$(CONFIG_SPL_NAND_LOAD) += nand_spl_load.o
 COBJS-$(CONFIG_SPL_NAND_ECC) += nand_ecc.o
 COBJS-$(CONFIG_SPL_NAND_BASE) += nand_base.o
+COBJS-$(CONFIG_SPL_NAND_MTD) += nand_spl_mtd.o
 
 else # not spl
 
@@ -78,6 +79,7 @@ COBJS-$(CONFIG_NAND_SPEAR) += spr_nand.o
 COBJS-$(CONFIG_TEGRA_NAND) += tegra_nand.o
 COBJS-$(CONFIG_NAND_OMAP_GPMC) += omap_gpmc.o
 COBJS-$(CONFIG_NAND_PLAT) += nand_plat.o
+COBJS-$(CONFIG_NAND_SUNXI) += sunxi_nand.o
 
 else  # minimal SPL drivers
 
