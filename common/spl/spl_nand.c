@@ -58,6 +58,12 @@ void spl_nand_load_image(void)
 			writel(readl(src), dst);
 		}
 
+#ifdef CONFIG_SUNXI
+		nand_spl_load_image(CONFIG_SUNXI_SCRIPT_OFS,
+			CONFIG_SUNXI_SCRIPT_SIZE,
+			(void *)CONFIG_SUNXI_SCRIPT_ADDR);
+#endif
+
 		/* load linux */
 		nand_spl_load_image(CONFIG_SYS_NAND_SPL_KERNEL_OFFS,
 			CONFIG_SYS_NAND_PAGE_SIZE, (void *)header);
