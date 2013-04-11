@@ -155,6 +155,7 @@ int writeenv(size_t offset, u_char *buf)
 			offset += blocksize;
 		} else {
 			char_ptr = &buf[amount_saved];
+			debug("nand write off=%x len=%x\n", offset, len);
 			if (nand_write(&nand_info[0], offset, &len, char_ptr))
 				return 1;
 
@@ -245,6 +246,9 @@ int saveenv(void)
 		return 1;
 	}
 	env_new->crc = crc32(0, env_new->data, ENV_SIZE);
+	// this printf is necessary for env_new to be updated before written to flash
+	//barrier();
+	printf("Save env CRC=%x\n", env_new->crc);
 
 	puts("Erasing Nand...\n");
 	if (nand_erase_opts(&nand_info[0], &nand_erase_options))

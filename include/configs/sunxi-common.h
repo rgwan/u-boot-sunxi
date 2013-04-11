@@ -240,6 +240,7 @@
 #ifdef CONFIG_NAND
 
 #define CONFIG_ENV_OFFSET		0x500000
+#define CONFIG_ENV_RANGE        0x300000
 
 #define CONFIG_EXTRA_ENV_SETTINGS										\
 	"kernel_loadaddr=0x48000000\0"										\

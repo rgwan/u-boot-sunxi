@@ -561,6 +561,8 @@ static void nfc_cmdfunc(struct mtd_info *mtd, unsigned command, int column,
 		addr_cycle = 5;
 		column = program_column;
 		page_addr = program_page;
+		debug("cmdfunc pageprog: %d %d\n", column, page_addr);
+
 		// for write OOB
 		if (column == mtd->writesize) {
 			sector_count = 1024 /1024;
