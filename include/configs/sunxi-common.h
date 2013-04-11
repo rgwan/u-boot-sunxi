@@ -32,6 +32,12 @@
 #define _SUNXI_COMMON_CONFIG_H
 
 /*
+#define DEBUG
+#define CONFIG_MTD_DEBUG
+#define CONFIG_MTD_DEBUG_VERBOSE 99
+*/
+
+/*
  * High Level Configuration Options
  */
 #define CONFIG_ALLWINNER	/* It's a Allwinner chip */
@@ -186,51 +192,54 @@
 #define CONFIG_SYS_MONITOR_LEN		(512 << 10)	/* 512 KB */
 #define CONFIG_IDENT_STRING		" Allwinner Technology"
 
-#define CONFIG_ENV_OFFSET		(544 << 10) /* (8 + 24 + 512)KB */
 #define CONFIG_ENV_SIZE			(128 << 10)	/* 128KB */
 
 #ifdef CONFIG_MMC
 
-#define CONFIG_BOOTCOMMAND \
-	"if run loadbootenv; then " \
-		"echo Loaded environment from ${bootenv};" \
-		"env import -t ${scriptaddr} ${filesize};" \
-	"fi;" \
-	"if test -n ${uenvcmd}; then " \
-		"echo Running uenvcmd ...;" \
-		"run uenvcmd;" \
-	"fi;" \
-	"if run loadbootscr; then "\
-		"echo Jumping to ${bootscr};" \
-		"source ${scriptaddr};" \
-	"fi;" \
-	"run setargs boot_mmc;" \
+#define CONFIG_ENV_OFFSET		(544 << 10) /* (8 + 24 + 512)KB */
 
-#define CONFIG_EXTRA_ENV_SETTINGS \
-	"console=ttyS0,115200\0" \
-	"root=/dev/mmcblk0p2 rootwait\0" \
-	"panicarg=panic=10\0" \
-	"extraargs=\0" \
-	"loglevel=8\0" \
-	"scriptaddr=0x44000000\0" \
-	"setargs=setenv bootargs console=${console} root=${root}" \
-		" loglevel=${loglevel} ${panicarg} ${extraargs}\0" \
-	"kernel=uImage\0" \
-	"bootenv=uEnv.txt\0" \
-	"bootscr=boot.scr\0" \
-	"loadbootscr=fatload mmc 0 $scriptaddr ${bootscr} ||" \
-		" ext2load mmc 0 $scriptaddr ${bootscr} ||" \
-		" ext2load mmc 0 $scriptaddr boot/${bootscr}\0" \
-	"loadbootenv=fatload mmc 0 $scriptaddr ${bootenv} ||" \
-		" ext2load mmc 0 $scriptaddr ${bootenv} ||" \
-		" ext2load mmc 0 $scriptaddr boot/${bootenv}\0" \
-	"boot_mmc=fatload mmc 0 0x43000000 script.bin &&" \
-		" fatload mmc 0 0x48000000 ${kernel} &&" \
-		" watchdog 0 && bootm 0x48000000\0"
+#define CONFIG_BOOTCOMMAND						\
+	"if run loadbootenv; then "					\
+	"echo Loaded environment from ${bootenv};"	\
+	"env import -t ${scriptaddr} ${filesize};"	\
+	"fi;"										\
+	"if test -n ${uenvcmd}; then "				\
+	"echo Running uenvcmd ...;"					\
+	"run uenvcmd;"								\
+	"fi;"										\
+	"if run loadbootscr; then "					\
+	"echo Jumping to ${bootscr};"				\
+	"source ${scriptaddr};"						\
+	"fi;"										\
+	"run setargs boot_mmc;"						\
+
+#define CONFIG_EXTRA_ENV_SETTINGS								\
+	"console=ttyS0,115200\0"									\
+	"root=/dev/mmcblk0p2 rootwait\0"							\
+	"panicarg=panic=10\0"										\
+	"extraargs=\0"												\
+	"loglevel=8\0"												\
+	"scriptaddr=0x44000000\0"									\
+	"setargs=setenv bootargs console=${console} root=${root}"	\
+	" loglevel=${loglevel} ${panicarg} ${extraargs}\0"			\
+	"kernel=uImage\0"											\
+	"bootenv=uEnv.txt\0"										\
+	"bootscr=boot.scr\0"										\
+	"loadbootscr=fatload mmc 0 $scriptaddr ${bootscr} ||"		\
+	" ext2load mmc 0 $scriptaddr ${bootscr} ||"					\
+	" ext2load mmc 0 $scriptaddr boot/${bootscr}\0"				\
+	"loadbootenv=fatload mmc 0 $scriptaddr ${bootenv} ||"		\
+	" ext2load mmc 0 $scriptaddr ${bootenv} ||"					\
+	" ext2load mmc 0 $scriptaddr boot/${bootenv}\0"				\
+	"boot_mmc=fatload mmc 0 0x43000000 script.bin &&"			\
+	" fatload mmc 0 0x48000000 ${kernel} &&"					\
+	" watchdog 0 && bootm 0x48000000\0"
 
 #endif
 
 #ifdef CONFIG_NAND
+
+#define CONFIG_ENV_OFFSET		0x500000
 
 #define CONFIG_EXTRA_ENV_SETTINGS										\
 	"kernel_loadaddr=0x48000000\0"										\
@@ -245,7 +254,7 @@
 	"nand read ${kernel_loadaddr} 0x1100000 0x400000; "					\
 	"bootm ${kernel_loadaddr}\0"										\
 	"bootcmd=run nandboot\0"											\
-	"bootdelay=1\0"
+	"bootdelay=5\0"
 
 #endif /* CONFIG_NAND */
 

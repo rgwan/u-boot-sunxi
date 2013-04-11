@@ -897,7 +897,7 @@ int board_nand_init(struct nand_chip *nand)
 	nand->read_buf = nfc_read_buf;
 	nand->write_buf = nfc_write_buf;
 	nand->waitfunc = nfc_wait;
-	//nand->bbt_options = NAND_BBT_USE_FLASH;
+	nand->options = NAND_USE_FLASH_BBT;
 
 	debug("board_nand_init finish\n");
 
