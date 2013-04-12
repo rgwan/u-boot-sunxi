@@ -1,6 +1,6 @@
 #!makefile
 
-em6000.scr: em6000.cmd
-	mkimage -C none -A arm -T script -a 0x44000000 -d $< $@
+em6000.env: em6000.src
+	../tools/mkenvimage -s 0x20000 -o $@ $<
 
 
