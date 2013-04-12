@@ -437,12 +437,15 @@ void _dma_config_start(__u32 rw, __u32 src_addr, __u32 dst_addr, __u32 len)
 
 	DMA_Setting(dma_hdle, (void *)&dma_param);
 
-	if((src_addr & 0x01c03000) == 0x01c03000) {
-        flush_cache(dst_addr, len);
-    }
-    else {
-        flush_cache(src_addr, len);
-    }
+	if (rw) {
+		debug("write flush src\n");
+		flush_cache(src_addr, len);
+	}
+	else {
+		debug("read flush dst\n");
+		flush_cache(dst_addr, len);
+	}
+
 	DMA_Start(dma_hdle, src_addr, dst_addr, len);
 }
 

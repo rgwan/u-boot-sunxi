@@ -246,9 +246,6 @@ int saveenv(void)
 		return 1;
 	}
 	env_new->crc = crc32(0, env_new->data, ENV_SIZE);
-	// this printf is necessary for env_new to be updated before written to flash
-	//barrier();
-	printf("Save env CRC=%x\n", env_new->crc);
 
 	puts("Erasing Nand...\n");
 	if (nand_erase_opts(&nand_info[0], &nand_erase_options))

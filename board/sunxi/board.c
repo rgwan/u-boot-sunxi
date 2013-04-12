@@ -115,7 +115,7 @@ void spl_display_print(void)
 int spl_start_uboot(void)
 {
 	// start uboot when console has input
-	udelay(1);
+	udelay(10);
 	return tstc();
 }
 #endif

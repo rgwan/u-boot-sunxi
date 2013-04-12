@@ -36,6 +36,9 @@
 #define CONFIG_MTD_DEBUG
 #define CONFIG_MTD_DEBUG_VERBOSE 99
 */
+/*
+#define CONFIG_SYS_DCACHE_OFF
+*/
 
 /*
  * High Level Configuration Options
