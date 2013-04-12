@@ -39,6 +39,15 @@ void spl_nand_load_image(void)
 	header = (struct image_header *)(CONFIG_SYS_TEXT_BASE);
 #ifdef CONFIG_SPL_OS_BOOT
 	if (!spl_start_uboot()) {
+
+#ifdef CONFIG_SUNXI
+		nand_spl_load_image(CONFIG_CMD_SPL_NAND_OFS,
+			CONFIG_CMD_SPL_WRITE_SIZE,
+			(void *)CONFIG_SYS_SPL_ARGS_ADDR);
+		nand_spl_load_image(CONFIG_SUNXI_SCRIPT_OFS,
+			CONFIG_SUNXI_SCRIPT_SIZE,
+			(void *)CONFIG_SUNXI_SCRIPT_ADDR);
+#else
 		/*
 		 * load parameter image
 		 * load to temp position since nand_spl_load_image reads
@@ -57,11 +66,6 @@ void spl_nand_load_image(void)
 				src++, dst++) {
 			writel(readl(src), dst);
 		}
-
-#ifdef CONFIG_SUNXI
-		nand_spl_load_image(CONFIG_SUNXI_SCRIPT_OFS,
-			CONFIG_SUNXI_SCRIPT_SIZE,
-			(void *)CONFIG_SUNXI_SCRIPT_ADDR);
 #endif
 
 		/* load linux */
