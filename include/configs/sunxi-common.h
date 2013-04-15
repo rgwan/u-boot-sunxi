@@ -198,6 +198,30 @@
 
 #define CONFIG_ENV_SIZE			(128 << 10)	/* 128KB */
 
+#define SHARE_BOOT_ENV													\
+	"cleanenv=nand erase 0x500000 0x300000\0"							\
+	"ethaddr=44:37:e6:28:3b:80\0"										\
+	"serverip=192.168.0.10\0"											\
+	"ipaddr=192.168.0.114\0"											\
+																		\
+	"loadaddr=0x44000000\0"												\
+	"fl_spl=nand erase 0 0x100000;nand write ${loadaddr} 0 0x100000\0"	\
+	"fl_uboot=nand erase 0x100000 0x400000;nand write ${loadaddr} 0x100000 0x100000\0" \
+	"fl_env=nand erase 0x500000 0x300000;nand write ${loadaddr} 0x500000 0x100000\0" \
+	"fl_fdt=nand erase 0x800000 0x300000;nand write ${loadaddr} 0x800000 0x100000\0" \
+	"fl_splash=nand erase 0xb00000 0x300000;nand write ${loadaddr} 0xb00000 0x100000\0"	\
+	"fl_script=nand erase 0xe00000 0x300000;nand write ${loadaddr} 0xe00000 0x100000\0" \
+	"fl_kernel=nand erase 0x1100000 0x800000;nand write ${loadaddr} 0x1100000 0x400000\0" \
+																		\
+	"tf_spl=tftp ${loadaddr} spl.bin;run fl_spl\0"						\
+	"tf_uboot=tftp ${loadaddr} u-boot.bin;run fl_uboot\0"				\
+	"tf_env=tftp ${loadaddr} em6000.env;run fl_env\0"					\
+	"tf_fdt=tftp ${loadaddr} em6000.dtb;run fl_fdt\0"					\
+	"tf_splash=tftp ${loadaddr} splash.bin;run fl_splash\0"				\
+	"tf_script=tftp ${loadaddr} script.bin;run fl_script\0"				\
+	"tf_kernel=tftp ${loadaddr} uImage;run fl_kernel\0"					\
+																		\
+
 #ifdef CONFIG_MMC
 
 #define CONFIG_ENV_OFFSET		(544 << 10) /* (8 + 24 + 512)KB */
@@ -217,31 +241,29 @@
 	"fi;"										\
 	"run setargs boot_mmc;"						\
 
-#define CONFIG_EXTRA_ENV_SETTINGS								\
-	"console=ttyS0,115200\0"									\
-	"root=/dev/mmcblk0p2 rootwait\0"							\
-	"panicarg=panic=10\0"										\
-	"extraargs=\0"												\
-	"loglevel=8\0"												\
-	"scriptaddr=0x44000000\0"									\
-	"setargs=setenv bootargs console=${console} root=${root}"	\
-	" loglevel=${loglevel} ${panicarg} ${extraargs}\0"			\
-	"kernel=uImage\0"											\
-	"bootenv=uEnv.txt\0"										\
-	"bootscr=boot.scr\0"										\
-	"loadbootscr=fatload mmc 0 $scriptaddr ${bootscr} ||"		\
-	" ext2load mmc 0 $scriptaddr ${bootscr} ||"					\
-	" ext2load mmc 0 $scriptaddr boot/${bootscr}\0"				\
-	"loadbootenv=fatload mmc 0 $scriptaddr ${bootenv} ||"		\
-	" ext2load mmc 0 $scriptaddr ${bootenv} ||"					\
-	" ext2load mmc 0 $scriptaddr boot/${bootenv}\0"				\
-	"boot_mmc=fatload mmc 0 0x43000000 script.bin &&"			\
-	" fatload mmc 0 0x48000000 ${kernel} &&"					\
-	" watchdog 0 && bootm 0x48000000\0"							\
-																\
-	"ethaddr=44:37:e6:28:3b:80\0"								\
-	"serverip=192.168.0.10\0"									\
-	"ipaddr=192.168.0.114\0"
+#define CONFIG_EXTRA_ENV_SETTINGS										\
+	"console=ttyS0,115200\0"											\
+	"root=/dev/mmcblk0p2 rootwait\0"									\
+	"panicarg=panic=10\0"												\
+	"extraargs=\0"														\
+	"loglevel=8\0"														\
+	"scriptaddr=0x44000000\0"											\
+	"setargs=setenv bootargs console=${console} root=${root}"			\
+	" mtdparts=mtd-nand-sunxi.0:1M,4M,3M,3M,3M,3M,8M,128M,-"			\
+	" loglevel=${loglevel} ${panicarg} ${extraargs}\0"					\
+	"kernel=uImage\0"													\
+	"bootenv=uEnv.txt\0"												\
+	"bootscr=boot.scr\0"												\
+	"loadbootscr=fatload mmc 0 $scriptaddr ${bootscr} ||"				\
+	" ext2load mmc 0 $scriptaddr ${bootscr} ||"							\
+	" ext2load mmc 0 $scriptaddr boot/${bootscr}\0"						\
+	"loadbootenv=fatload mmc 0 $scriptaddr ${bootenv} ||"				\
+	" ext2load mmc 0 $scriptaddr ${bootenv} ||"							\
+	" ext2load mmc 0 $scriptaddr boot/${bootenv}\0"						\
+	"boot_mmc=fatload mmc 0 0x43000000 script.bin &&"					\
+	" fatload mmc 0 0x48000000 ${kernel} &&"							\
+	" watchdog 0 && bootm 0x48000000\0"									\
+	SHARE_BOOT_ENV
 
 #endif
 
@@ -264,28 +286,7 @@
 	"bootm ${kernel_loadaddr}\0"										\
 	"bootcmd=run nandboot\0"											\
 	"bootdelay=5\0"														\
-																		\
-	"loadaddr=0x44000000\0"												\
-	"fl_spl=nand erase 0 0x100000;nand write ${loadaddr} 0 0x100000\0"	\
-	"fl_uboot=nand erase 0x100000 0x400000;nand write ${loadaddr} 0x100000 0x100000\0" \
-	"fl_env=nand erase 0x500000 0x300000;nand write ${loadaddr} 0x500000 0x100000\0" \
-	"fl_fdt=nand erase 0x800000 0x300000;nand write ${loadaddr} 0x800000 0x100000\0" \
-	"fl_splash=nand erase 0xb00000 0x300000;nand write ${loadaddr} 0xb00000 0x100000\0"	\
-	"fl_script=nand erase 0xe00000 0x300000;nand write ${loadaddr} 0xe00000 0x100000\0" \
-	"fl_kernel=nand erase 0x1100000 0x800000;nand write ${loadaddr} 0x1100000 0x400000\0" \
-																		\
-	"tf_spl=tftp ${loadaddr} spl.bin;run fl_spl\0"						\
-	"tf_uboot=tftp ${loadaddr} u-boot.bin;run fl_uboot\0"				\
-	"tf_env=tftp ${loadaddr} em6000.env;run fl_env\0"					\
-	"tf_fdt=tftp ${loadaddr} em6000.dtb;run fl_fdt\0"					\
-	"tf_splash=tftp ${loadaddr} splash.bin;run fl_splash\0"				\
-	"tf_script=tftp ${loadaddr} script.bin;run fl_script\0"				\
-	"tf_kernel=tftp ${loadaddr} uImage;run fl_kernel\0"					\
-																		\
-	"cleanenv=nand erase 0x500000 0x300000\0"							\
-	"ethaddr=44:37:e6:28:3b:80\0"										\
-	"serverip=192.168.0.10\0"											\
-	"ipaddr=192.168.0.114\0"											\
+	SHARE_BOOT_ENV
 
 #endif /* CONFIG_NAND */
 
