@@ -101,6 +101,32 @@ void sunxi_nand_set_gpio(void)
 	writel(0x22222222, &pio->cfg[2]);
 }
 
+void select_rb(int rb)
+{
+	uint32_t ctl;
+	// A10 has 2 RB pin
+	ctl = readl(NFC_REG_CTL);
+	ctl &= ~NFC_RB_SEL;
+	ctl |= ((rb & 0x1) << 3);
+	writel(ctl, NFC_REG_CTL);
+}
+
+void enable_random(void)
+{
+	uint32_t ctl;
+	ctl = readl(NFC_REG_ECC_CTL);
+	ctl |= NFC_RANDOM_EN;
+	writel(ctl, NFC_REG_ECC_CTL);
+}
+
+void disable_random(void)
+{
+	uint32_t ctl;
+	ctl = readl(NFC_REG_ECC_CTL);
+	ctl &= ~NFC_RANDOM_EN;
+	writel(ctl, NFC_REG_ECC_CTL);
+}
+
 void enable_ecc(int pipline)
 {
 	uint32_t cfg = readl(NFC_REG_ECC_CTL);

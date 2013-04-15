@@ -81,14 +81,16 @@
 #define CONFIG_NR_DRAM_BANKS		1
 #define PHYS_SDRAM_1			CONFIG_SYS_SDRAM_BASE
 
+/* NAND support */
+#define CONFIG_NAND_SUNXI
+#define CONFIG_CMD_NAND
+#define CONFIG_SYS_MAX_NAND_DEVICE      1
+#define CONFIG_SYS_NAND_BASE            0
+#define CONFIG_SUNXI_DMA
+
 /* Nand config */
 #ifdef CONFIG_NAND
 
-#define CONFIG_NAND_SUNXI
-#define CONFIG_CMD_NAND                         /* NAND support */
-#define CONFIG_SYS_MAX_NAND_DEVICE      1
-#define CONFIG_SYS_NAND_BASE            0x00
-#define CONFIG_SUNXI_DMA
 #define CONFIG_ENV_IS_IN_NAND
 #define CONFIG_SPL_NAND_SUPPORT
 #define CONFIG_SPL_NAND_ECC
@@ -150,7 +152,7 @@
  * Size of malloc() pool
  * 1MB = 0x100000, 0x100000 = 1024 * 1024
  */
-#define CONFIG_SYS_MALLOC_LEN		(CONFIG_ENV_SIZE + (1 << 20))
+#define CONFIG_SYS_MALLOC_LEN		(CONFIG_ENV_SIZE + (16 << 20))
 
 /* Flat Device Tree (FDT/DT) support */
 #define CONFIG_OF_LIBFDT
@@ -235,7 +237,11 @@
 	" ext2load mmc 0 $scriptaddr boot/${bootenv}\0"				\
 	"boot_mmc=fatload mmc 0 0x43000000 script.bin &&"			\
 	" fatload mmc 0 0x48000000 ${kernel} &&"					\
-	" watchdog 0 && bootm 0x48000000\0"
+	" watchdog 0 && bootm 0x48000000\0"							\
+																\
+	"ethaddr=44:37:e6:28:3b:80\0"								\
+	"serverip=192.168.0.10\0"									\
+	"ipaddr=192.168.0.114\0"
 
 #endif
 
@@ -277,6 +283,7 @@
 	"tf_kernel=tftp ${loadaddr} uImage;run fl_kernel\0"					\
 																		\
 	"cleanenv=nand erase 0x500000 0x300000\0"							\
+	"ethaddr=44:37:e6:28:3b:80\0"										\
 	"serverip=192.168.0.10\0"											\
 	"ipaddr=192.168.0.114\0"											\
 

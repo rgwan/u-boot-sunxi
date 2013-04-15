@@ -181,38 +181,15 @@ static inline void wait_cmd_finish(void)
 	writel(NFC_CMD_INT_FLAG, NFC_REG_ST);
 }
 
-static inline void select_rb(int rb)
-{
-	uint32_t ctl;
-	// A10 has 2 RB pin
-	ctl = readl(NFC_REG_CTL);
-	ctl &= ~NFC_RB_SEL;
-	ctl |= ((rb & 0x1) << 3);
-	writel(ctl, NFC_REG_CTL);
-}
-
 // 1 for ready, 0 for not ready
 static inline int check_rb_ready(int rb)
 {
 	return (readl(NFC_REG_ST) & (NFC_RB_STATE0 << (rb & 0x3))) ? 1 : 0;
 }
 
-static inline void enable_random(void)
-{
-	uint32_t ctl;
-	ctl = readl(NFC_REG_ECC_CTL);
-	ctl |= NFC_RANDOM_EN;
-	writel(ctl, NFC_REG_ECC_CTL);
-}
-
-static inline void disable_random(void)
-{
-	uint32_t ctl;
-	ctl = readl(NFC_REG_ECC_CTL);
-	ctl &= ~NFC_RANDOM_EN;
-	writel(ctl, NFC_REG_ECC_CTL);
-}
-
+void select_rb(int rb);
+void enable_random(void);
+void disable_random(void);
 void enable_ecc(int pipline);
 int check_ecc(int eblock_cnt);
 void disable_ecc(void);
