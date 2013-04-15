@@ -205,21 +205,21 @@
 	"ipaddr=192.168.0.114\0"											\
 																		\
 	"loadaddr=0x44000000\0"												\
-	"fl_spl=nand erase 0 0x100000;nand write ${loadaddr} 0 0x100000\0"	\
-	"fl_uboot=nand erase 0x100000 0x400000;nand write ${loadaddr} 0x100000 0x100000\0" \
-	"fl_env=nand erase 0x500000 0x300000;nand write ${loadaddr} 0x500000 0x100000\0" \
-	"fl_fdt=nand erase 0x800000 0x300000;nand write ${loadaddr} 0x800000 0x100000\0" \
-	"fl_splash=nand erase 0xb00000 0x300000;nand write ${loadaddr} 0xb00000 0x100000\0"	\
-	"fl_script=nand erase 0xe00000 0x300000;nand write ${loadaddr} 0xe00000 0x100000\0" \
-	"fl_kernel=nand erase 0x1100000 0x800000;nand write ${loadaddr} 0x1100000 0x400000\0" \
+	"fl_spl=nand erase 0 0x100000 && nand write ${loadaddr} 0 0x100000\0"	\
+	"fl_uboot=nand erase 0x100000 0x400000 && nand write ${loadaddr} 0x100000 0x100000\0" \
+	"fl_env=nand erase 0x500000 0x300000 && nand write ${loadaddr} 0x500000 0x100000\0" \
+	"fl_fdt=nand erase 0x800000 0x300000 && nand write ${loadaddr} 0x800000 0x100000\0" \
+	"fl_splash=nand erase 0xb00000 0x300000 && nand write ${loadaddr} 0xb00000 0x100000\0"	\
+	"fl_script=nand erase 0xe00000 0x300000 && nand write ${loadaddr} 0xe00000 0x100000\0" \
+	"fl_kernel=nand erase 0x1100000 0x800000 && nand write ${loadaddr} 0x1100000 0x500000\0" \
 																		\
-	"tf_spl=tftp ${loadaddr} spl.bin;run fl_spl\0"						\
-	"tf_uboot=tftp ${loadaddr} u-boot.bin;run fl_uboot\0"				\
-	"tf_env=tftp ${loadaddr} em6000.env;run fl_env\0"					\
-	"tf_fdt=tftp ${loadaddr} em6000.dtb;run fl_fdt\0"					\
-	"tf_splash=tftp ${loadaddr} splash.bin;run fl_splash\0"				\
-	"tf_script=tftp ${loadaddr} script.bin;run fl_script\0"				\
-	"tf_kernel=tftp ${loadaddr} uImage;run fl_kernel\0"					\
+	"tf_spl=tftp ${loadaddr} spl.bin && run fl_spl\0"						\
+	"tf_uboot=tftp ${loadaddr} u-boot.bin && run fl_uboot\0"				\
+	"tf_env=tftp ${loadaddr} em6000.env && run fl_env\0"					\
+	"tf_fdt=tftp ${loadaddr} em6000.dtb && run fl_fdt\0"					\
+	"tf_splash=tftp ${loadaddr} splash.bin && run fl_splash\0"				\
+	"tf_script=tftp ${loadaddr} script.bin && run fl_script\0"				\
+	"tf_kernel=tftp ${loadaddr} uImage && run fl_kernel\0"					\
 																		\
 
 #ifdef CONFIG_MMC
