@@ -25,6 +25,28 @@
 #include <spl.h>
 #include <asm/io.h>
 #include <nand.h>
+#include <image.h>
+
+static void load_uimage(struct image_header *header, uint32_t offs)
+{
+	char *name;
+	uint32_t load_addr, size;
+
+	nand_spl_load_image(offs, CONFIG_SYS_NAND_PAGE_SIZE, (void *)header);
+	if (image_get_magic(header) != IH_MAGIC) {
+		error("image at flash offset %x has no signature\n", offs);
+		return;
+	}
+
+	load_addr = image_get_load(header);
+	size = image_get_data_size(header);
+	name = image_get_name(header);
+	debug("load image %s from flash offset %x to memory %x size %x\n",
+		  name, offs, load_addr, size);
+
+	nand_spl_load_image(offs, size + sizeof(struct image_header), 
+						load_addr - sizeof(struct image_header));
+}
 
 void spl_nand_load_image(void)
 {
@@ -44,9 +66,9 @@ void spl_nand_load_image(void)
 		nand_spl_load_image(CONFIG_CMD_SPL_NAND_OFS,
 			CONFIG_CMD_SPL_WRITE_SIZE,
 			(void *)CONFIG_SYS_SPL_ARGS_ADDR);
-		nand_spl_load_image(CONFIG_SUNXI_SCRIPT_OFS,
-			CONFIG_SUNXI_SCRIPT_SIZE,
-			(void *)CONFIG_SUNXI_SCRIPT_ADDR);
+
+		load_uimage(header, CONFIG_SUNXI_SCRIPT_OFS);
+		load_uimage(header, CONFIG_SUNXI_SPLASH_OFS);
 #else
 		/*
 		 * load parameter image

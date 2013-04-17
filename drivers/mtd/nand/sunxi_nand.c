@@ -432,7 +432,6 @@ int board_nand_init(struct nand_chip *nand)
 	// set ECC mode
 	ctl = readl(NFC_REG_ECC_CTL);
 	ctl &= ~NFC_ECC_MODE;
-	ctl &= ~NFC_ECC_MODE;
 	ctl |= chip_param->ecc_mode << NFC_ECC_MODE_SHIFT;
 	writel(ctl, NFC_REG_ECC_CTL);
 

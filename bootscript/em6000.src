@@ -1,8 +1,9 @@
 kernel_loadaddr=0x48000000
-script_loadaddr=0x43000000
+script_loadaddr=0x42ffffc0
+splash_loadaddr=0x430fffc0
 console=ttyS0,115200n8
 nandargs=setenv bootargs console=${console} init=/linuxrc mtdparts=mtd-nand-sunxi.0:1M,4M,3M,3M,3M,3M,8M,128M,- ubi.mtd=7 root=ubi0:rootfs rootwait rootfstype=ubifs quiet
-nandboot=run nandargs && nand read ${script_loadaddr} 0xe00000 0x10000 && nand read ${kernel_loadaddr} 0x1100000 0x400000 && bootm ${kernel_loadaddr}
+nandboot=run nandargs && nand read ${script_loadaddr} 0xe00000 0x10000 && nand read ${splash_loadaddr} 0xb00000 0x10000 && nand read ${kernel_loadaddr} 0x1100000 0x500000 && bootm ${kernel_loadaddr}
 bootcmd=run nandboot
 bootdelay=5
 loadaddr=0x44000000
