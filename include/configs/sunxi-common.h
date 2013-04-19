@@ -215,8 +215,8 @@
 	"tf_uboot=tftp ${loadaddr} u-boot.bin && run fl_uboot\0"				\
 	"tf_env=tftp ${loadaddr} em6000.env && run fl_env\0"					\
 	"tf_fdt=tftp ${loadaddr} em6000.dtb && run fl_fdt\0"					\
-	"tf_splash=tftp ${loadaddr} splash.bin && run fl_splash\0"				\
-	"tf_script=tftp ${loadaddr} script.bin && run fl_script\0"				\
+	"tf_splash=tftp ${loadaddr} usplash.bin && run fl_splash\0"				\
+	"tf_script=tftp ${loadaddr} uscript.bin && run fl_script\0"				\
 	"tf_kernel=tftp ${loadaddr} uImage && run fl_kernel\0"					\
 																		\
 
