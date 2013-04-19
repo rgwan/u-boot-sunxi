@@ -271,7 +271,7 @@
 #define CONFIG_ENV_RANGE        0x300000
 
 #define CONFIG_EXTRA_ENV_SETTINGS										\
-	"kernel_loadaddr=0x48000000\0"										\
+	"kernel_loadaddr=0x47ffffc0\0"										\
 	"script_loadaddr=0x42ffffc0\0"										\
 	"splash_loadaddr=0x430fffc0\0"										\
 	"console=ttyS0,115200n8\0"											\
