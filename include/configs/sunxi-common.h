@@ -88,6 +88,14 @@
 #define CONFIG_SYS_NAND_BASE            0
 #define CONFIG_SUNXI_DMA
 
+#define CONFIG_RBTREE
+#define CONFIG_LZO
+#define CONFIG_MTD_DEVICE
+#define CONFIG_MTD_PARTITIONS
+#define CONFIG_CMD_MTDPARTS
+#define CONFIG_CMD_UBI
+#define CONFIG_CMD_UBIFS
+
 /* Nand config */
 #ifdef CONFIG_NAND
 
