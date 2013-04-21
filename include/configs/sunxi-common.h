@@ -230,10 +230,10 @@
 	"tf_uboot=tftp ${loadaddr} u-boot.bin && run fl_uboot\0"			\
 	"tf_env=tftp ${loadaddr} em6000.env && run fl_env\0"				\
 	"tf_fdt=tftp ${loadaddr} em6000.dtb && run fl_fdt\0"				\
-	"tf_splash=tftp ${loadaddr} splash.bin && run fl_splash\0"			\
-	"tf_script=tftp ${loadaddr} script.bin && run fl_script\0"			\
+	"tf_splash=tftp ${loadaddr} usplash.bin && run fl_splash\0"			\
+	"tf_script=tftp ${loadaddr} uscript.bin && run fl_script\0"			\
 	"tf_kernel=tftp ${loadaddr} uImage && run fl_kernel\0"				\
-																		\
+
 
 #ifdef CONFIG_MMC
 
@@ -286,7 +286,7 @@
 #define CONFIG_ENV_RANGE        0x300000
 
 #define CONFIG_EXTRA_ENV_SETTINGS										\
-	"kernel_loadaddr=0x48000000\0"										\
+	"kernel_loadaddr=0x47ffffc0\0"										\
 	"script_loadaddr=0x42ffffc0\0"										\
 	"splash_loadaddr=0x430fffc0\0"										\
 	"console=ttyS0,115200n8\0"											\
