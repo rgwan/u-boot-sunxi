@@ -255,6 +255,7 @@
 	"run setargs boot_mmc;"						\
 
 #define CONFIG_EXTRA_ENV_SETTINGS										\
+	"kerneladdr=0x47000000\0"											\
 	"console=ttyS0,115200\0"											\
 	"root=/dev/mmcblk0p2 rootwait\0"									\
 	"panicarg=panic=10\0"												\
@@ -274,8 +275,8 @@
 	" ext2load mmc 0 $scriptaddr ${bootenv} ||"							\
 	" ext2load mmc 0 $scriptaddr boot/${bootenv}\0"						\
 	"boot_mmc=fatload mmc 0 0x43000000 script.bin &&"					\
-	" fatload mmc 0 0x48000000 ${kernel} &&"							\
-	" watchdog 0 && bootm 0x48000000\0"									\
+	" fatload mmc 0 ${kerneladdr} ${kernel} &&"							\
+	" watchdog 0 && bootm ${kerneladdr}\0"								\
 	SHARE_BOOT_ENV
 
 #endif
