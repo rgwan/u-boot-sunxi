@@ -88,6 +88,14 @@
 #define CONFIG_SYS_NAND_BASE            0
 #define CONFIG_SUNXI_DMA
 
+#define CONFIG_RBTREE
+#define CONFIG_LZO
+#define CONFIG_MTD_DEVICE
+#define CONFIG_MTD_PARTITIONS
+#define CONFIG_CMD_MTDPARTS
+#define CONFIG_CMD_UBI
+#define CONFIG_CMD_UBIFS
+
 /* Nand config */
 #ifdef CONFIG_NAND
 
@@ -202,23 +210,30 @@
 	"serverip=192.168.0.10\0"											\
 	"ipaddr=192.168.0.114\0"											\
 																		\
+	"mtdids=nand0=mtd-nand-sunxi.0\0"									\
+	"mtdparts=mtdparts=mtd-nand-sunxi.0:1M(spl),4M(uboot),3M(env),3M(fdt),3M(splash),3M(script),8M(kernel),128M(initfs),-(rootfs)\0" \
+																		\
 	"loadaddr=0x44000000\0"												\
-	"fl_spl=nand erase 0 0x100000 && nand write ${loadaddr} 0 0x100000\0"	\
+	"fl_spl=nand erase 0 0x100000 && nand write ${loadaddr} 0 0x100000\0" \
 	"fl_uboot=nand erase 0x100000 0x400000 && nand write ${loadaddr} 0x100000 0x100000\0" \
 	"fl_env=nand erase 0x500000 0x300000 && nand write ${loadaddr} 0x500000 0x100000\0" \
 	"fl_fdt=nand erase 0x800000 0x300000 && nand write ${loadaddr} 0x800000 0x100000\0" \
-	"fl_splash=nand erase 0xb00000 0x300000 && nand write ${loadaddr} 0xb00000 0x100000\0"	\
+	"fl_splash=nand erase 0xb00000 0x300000 && nand write ${loadaddr} 0xb00000 0x100000\0" \
 	"fl_script=nand erase 0xe00000 0x300000 && nand write ${loadaddr} 0xe00000 0x100000\0" \
 	"fl_kernel=nand erase 0x1100000 0x800000 && nand write ${loadaddr} 0x1100000 0x500000\0" \
+	"fl_initfs=nand erase 0x1900000 0x8000000 && "						\
+	"  ubi part initfs && ubi create data 0x1000000 && ubi create rootfs && " \
+	"  tftp ${loadaddr} data.img && ubi write ${loadaddr} data 0xd00000 && " \
+	"  tftp ${loadaddr} rootfs.img && ubi write ${loadaddr} rootfs 0x3000000\0"	\
 																		\
-	"tf_spl=tftp ${loadaddr} spl.bin && run fl_spl\0"						\
-	"tf_uboot=tftp ${loadaddr} u-boot.bin && run fl_uboot\0"				\
-	"tf_env=tftp ${loadaddr} em6000.env && run fl_env\0"					\
-	"tf_fdt=tftp ${loadaddr} em6000.dtb && run fl_fdt\0"					\
-	"tf_splash=tftp ${loadaddr} usplash.bin && run fl_splash\0"				\
-	"tf_script=tftp ${loadaddr} uscript.bin && run fl_script\0"				\
-	"tf_kernel=tftp ${loadaddr} uImage && run fl_kernel\0"					\
-																		\
+	"tf_spl=tftp ${loadaddr} spl.bin && run fl_spl\0"					\
+	"tf_uboot=tftp ${loadaddr} u-boot.bin && run fl_uboot\0"			\
+	"tf_env=tftp ${loadaddr} em6000.env && run fl_env\0"				\
+	"tf_fdt=tftp ${loadaddr} em6000.dtb && run fl_fdt\0"				\
+	"tf_splash=tftp ${loadaddr} usplash.bin && run fl_splash\0"			\
+	"tf_script=tftp ${loadaddr} uscript.bin && run fl_script\0"			\
+	"tf_kernel=tftp ${loadaddr} uImage && run fl_kernel\0"				\
+
 
 #ifdef CONFIG_MMC
 

@@ -710,7 +710,7 @@ static int part_parse(const char *const partdef, const char **ret, struct part_i
  * @param size a pointer to the size of the mtd device (output)
  * @return 0 if device is valid, 1 otherwise
  */
-static int mtd_device_validate(u8 type, u8 num, u32 *size)
+static int mtd_device_validate(u8 type, u8 num, u64 *size)
 {
 	struct mtd_info *mtd = NULL;
 
@@ -1275,7 +1275,7 @@ static void print_partition_table(void)
 			part = list_entry(pentry, struct part_info, link);
 			net_size = net_part_size(mtd, part);
 			size_note = part->size == net_size ? " " : " (!)";
-			printf("%2d: %-20s0x%08x\t0x%08x%s\t0x%08x\t%d\n",
+			printf("%2d: %-20s0x%08llx\t0x%08x%s\t0x%08llx\t%d\n",
 					part_num, part->name, part->size,
 					net_size, size_note, part->offset,
 					part->mask_flags);
@@ -1287,7 +1287,7 @@ static void print_partition_table(void)
 
 		list_for_each(pentry, &dev->parts) {
 			part = list_entry(pentry, struct part_info, link);
-			printf("%2d: %-20s0x%08x\t0x%08x\t%d\n",
+			printf("%2d: %-20s0x%08llx\t0x%08llx\t%d\n",
 					part_num, part->name, part->size,
 					part->offset, part->mask_flags);
 #endif /* defined(CONFIG_CMD_MTDPARTS_SHOW_NET_SIZES) */
@@ -1600,7 +1600,7 @@ static int parse_mtdids(const char *const ids)
 	struct list_head *entry, *n;
 	struct mtdids *id_tmp;
 	u8 type, num;
-	u32 size;
+	u64 size;
 	int ret = 1;
 
 	debug("\n---parse_mtdids---\nmtdids = %s\n\n", ids);
