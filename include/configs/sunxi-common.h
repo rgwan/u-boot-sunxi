@@ -235,8 +235,8 @@
 	"tf_splash=tftp ${loadaddr} usplash.bin && run fl_splash\0"			\
 	"tf_script=tftp ${loadaddr} uscript.bin && run fl_script\0"			\
 	"tf_kernel=tftp ${loadaddr} uImage && run fl_kernel\0"				\
-	"tf_initfs=tftp ${loadaddr} initfs.img && fl_initfs\0"			\
-	"tf_rootfs=tftp ${loadaddr} rootfs.img && fl_rootfs\0"				\
+	"tf_initfs=tftp ${loadaddr} initfs.img && run fl_initfs\0"			\
+	"tf_rootfs=tftp ${loadaddr} rootfs.img && run fl_rootfs\0"			\
 
 
 #ifdef CONFIG_MMC
