@@ -1,8 +1,8 @@
-kernel_loadaddr=0x48000000
+kernel_loadaddr=0x47ffffc0
 script_loadaddr=0x42ffffc0
 splash_loadaddr=0x430fffc0
 console=ttyS0,115200n8
-nandargs=setenv bootargs console=${console} init=/linuxrc mtdparts=mtd-nand-sunxi.0:1M,4M,3M,3M,3M,3M,8M,128M,- ubi.mtd=7 root=ubi0:rootfs rootwait rootfstype=ubifs quiet
+nandargs=setenv bootargs console=${console} init=/linuxrc mtdparts=mtd-nand-sunxi.0:14M@0xb00000,64M,- ubi.mtd=2 root=ubi0:rootfs rootwait rootfstype=ubifs root2=10:/dev/blockrom1,squashfs,/init quiet
 nandboot=run nandargs && nand read ${script_loadaddr} 0xe00000 0x10000 && nand read ${splash_loadaddr} 0xb00000 0x10000 && nand read ${kernel_loadaddr} 0x1100000 0x500000 && bootm ${kernel_loadaddr}
 bootcmd=run nandboot
 bootdelay=5
@@ -14,6 +14,8 @@ fl_fdt=nand erase 0x800000 0x300000 && nand write ${loadaddr} 0x800000 0x100000
 fl_splash=nand erase 0xb00000 0x300000 && nand write ${loadaddr} 0xb00000 0x100000
 fl_script=nand erase 0xe00000 0x300000 && nand write ${loadaddr} 0xe00000 0x100000
 fl_kernel=nand erae 0x1100000 0x800000 && nand write ${loadaddr} 0x1100000 0x500000
+fl_initfs=nand erase 0x1900000 0x4000000 && nand write ${loadaddr} 0x1900000 0x2000000
+fl_rootfs=nand erase 0x1d00000 0x8000000 && ubi part rootfs && ubi create rootfs 0x8000000 && ubi create user-data &&  ubi write ${loadaddr} rootfs 0x4000000
 tf_spl=tftp ${loadaddr} spl.bin && run fl_spl
 tf_uboot=tftp ${loadaddr} u-boot.bin && run fl_uboot
 tf_env=tftp ${loadaddr} em6000.env && run fl_env
@@ -21,10 +23,11 @@ tf_fdt=tftp ${loadaddr} em6000.dtb && run fl_fdt
 tf_splash=tftp ${loadaddr} usplash.bin && run fl_splash
 tf_script=tftp ${loadaddr} uscript.bin && run fl_script
 tf_kernel=tftp ${loadaddr} uImage && run fl_kernel
+tf_initfs=tftp ${loadaddr} initfs.img && fl_initfs
+tf_rootfs=tftp ${loadaddr} rootfs.img && fl_rootfs
 cleanenv=nand erase 0x500000 0x300000
 ethaddr=44:37:e6:28:3b:80
 serverip=192.168.0.10
 ipaddr=192.168.0.114
 mtdids=nand0=mtd-nand-sunxi.0
 mtdparts=mtdparts=mtd-nand-sunxi.0:1M(spl),4M(uboot),3M(env),3M(fdt),3M(splash),3M(script),8M(kernel),128M(initfs),-(rootfs)
-fl_initfs=nand erase 0x1900000 0x8000000 && ubi part initfs && ubi create data 0x1000000 && ubi create rootfs && tftp ${loadaddr} data.img && ubi write ${loadaddr} data 0xd00000 && tftp ${loadaddr} rootfs.img && ubi write ${loadaddr} rootfs 0x3000000

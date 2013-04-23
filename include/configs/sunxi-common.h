@@ -211,7 +211,7 @@
 	"ipaddr=192.168.0.114\0"											\
 																		\
 	"mtdids=nand0=mtd-nand-sunxi.0\0"									\
-	"mtdparts=mtdparts=mtd-nand-sunxi.0:1M(spl),4M(uboot),3M(env),3M(fdt),3M(splash),3M(script),8M(kernel),128M(initfs),-(rootfs)\0" \
+	"mtdparts=mtdparts=mtd-nand-sunxi.0:1M(spl),4M(uboot),3M(env),3M(fdt),3M(splash),3M(script),8M(kernel),64M(initfs),-(rootfs)\0" \
 																		\
 	"loadaddr=0x44000000\0"												\
 	"fl_spl=nand erase 0 0x100000 && nand write ${loadaddr} 0 0x100000\0" \
@@ -221,10 +221,12 @@
 	"fl_splash=nand erase 0xb00000 0x300000 && nand write ${loadaddr} 0xb00000 0x100000\0" \
 	"fl_script=nand erase 0xe00000 0x300000 && nand write ${loadaddr} 0xe00000 0x100000\0" \
 	"fl_kernel=nand erase 0x1100000 0x800000 && nand write ${loadaddr} 0x1100000 0x500000\0" \
-	"fl_initfs=nand erase 0x1900000 0x8000000 && "						\
-	"  ubi part initfs && ubi create data 0x1000000 && ubi create rootfs && " \
-	"  tftp ${loadaddr} data.img && ubi write ${loadaddr} data 0xd00000 && " \
-	"  tftp ${loadaddr} rootfs.img && ubi write ${loadaddr} rootfs 0x3000000\0"	\
+	"fl_initfs=nand erase 0x1900000 0x4000000 && nand write ${loadaddr} 0x1900000 0x2000000\0" \
+	"fl_rootfs=nand erase 0x1d00000 0x8000000 && "						\
+	"  ubi part rootfs && "												\
+	"  ubi create rootfs 0x8000000 && "									\
+	"  ubi create user-data && "										\
+	"  ubi write ${loadaddr} rootfs 0x4000000\0"						\
 																		\
 	"tf_spl=tftp ${loadaddr} spl.bin && run fl_spl\0"					\
 	"tf_uboot=tftp ${loadaddr} u-boot.bin && run fl_uboot\0"			\
@@ -233,6 +235,8 @@
 	"tf_splash=tftp ${loadaddr} usplash.bin && run fl_splash\0"			\
 	"tf_script=tftp ${loadaddr} uscript.bin && run fl_script\0"			\
 	"tf_kernel=tftp ${loadaddr} uImage && run fl_kernel\0"				\
+	"tf_initfs=tftp ${loadaddr} initfs.img && fl_initfs\0"			\
+	"tf_rootfs=tftp ${loadaddr} rootfs.img && fl_rootfs\0"				\
 
 
 #ifdef CONFIG_MMC
@@ -263,7 +267,7 @@
 	"loglevel=8\0"														\
 	"scriptaddr=0x44000000\0"											\
 	"setargs=setenv bootargs console=${console} root=${root}"			\
-	" mtdparts=mtd-nand-sunxi.0:1M,4M,3M,3M,3M,3M,8M,128M,-"			\
+	" mtdparts=mtd-nand-sunxi.0:1M,4M,3M,3M,3M,3M,8M,64M,-"				\
 	" loglevel=${loglevel} ${panicarg} ${extraargs}\0"					\
 	"kernel=uImage\0"													\
 	"bootenv=uEnv.txt\0"												\
@@ -292,8 +296,9 @@
 	"splash_loadaddr=0x430fffc0\0"										\
 	"console=ttyS0,115200n8\0"											\
 	"nandargs=setenv bootargs console=${console} init=/linuxrc "		\
-	"mtdparts=mtd-nand-sunxi.0:1M,4M,3M,3M,3M,3M,8M,128M,- ubi.mtd=7 "	\
+	"mtdparts=mtd-nand-sunxi.0:14M@0xb00000,64M,- ubi.mtd=2 "			\
 	"root=ubi0:rootfs rootwait rootfstype=ubifs "						\
+	"root2=10:/dev/blockrom1,squashfs,/init "							\
 	"quiet\0"															\
 	"nandboot=run nandargs; "											\
 	"nand read ${script_loadaddr} 0xe00000 0x10000; "					\
