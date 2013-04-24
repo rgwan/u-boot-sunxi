@@ -281,6 +281,17 @@
 	"boot_mmc=fatload mmc 0 0x43000000 script.bin &&"					\
 	" fatload mmc 0 ${kerneladdr} ${kernel} &&"							\
 	" watchdog 0 && bootm ${kerneladdr}\0"								\
+	"cleanenv=mmc erase 0x440 0x100\0"									\
+																		\
+	"mf_spl=fatload mmc 0 ${loadaddr} spl.bin && run fl_spl\0"			\
+	"mf_uboot=fatload mmc 0 ${loadaddr} u-boot.bin && run fl_uboot\0"	\
+	"mf_env=fatload mmc 0 ${loadaddr} em6000.env && run fl_env\0"		\
+	"mf_fdt=fatload mmc 0 ${loadaddr} em6000.dtb && run fl_fdt\0"		\
+	"mf_splash=fatload mmc 0 ${loadaddr} usplash.bin && run fl_splash\0" \
+	"mf_script=fatload mmc 0 ${loadaddr} uscript.bin && run fl_script\0" \
+	"mf_kernel=fatload mmc 0 ${loadaddr} uImage && run fl_kernel\0"		\
+	"mf_initfs=fatload mmc 0 ${loadaddr} initfs.img && run fl_initfs\0"	\
+	"mf_rootfs=fatload mmc 0 ${loadaddr} rootfs.img && run fl_rootfs\0"	\
 	SHARE_BOOT_ENV
 
 #endif
