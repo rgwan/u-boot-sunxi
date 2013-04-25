@@ -77,6 +77,7 @@ COBJS-y += vsprintf.o
 COBJS-$(CONFIG_RANDOM_MACADDR) += rand.o
 COBJS-$(CONFIG_BOOTP_RANDOM_DELAY) += rand.o
 COBJS-$(CONFIG_CMD_LINK_LOCAL) += rand.o
+COBJS-$(CONFIG_RAND_FUNCTION) += rand.o
 
 COBJS	:= $(sort $(COBJS-y))
 SRCS	:= $(COBJS:.o=.c)

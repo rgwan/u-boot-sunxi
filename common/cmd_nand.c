@@ -24,6 +24,7 @@
 #include <command.h>
 #include <watchdog.h>
 #include <malloc.h>
+#include <errno.h>
 #include <asm/byteorder.h>
 #include <jffs2/jffs2.h>
 #include <nand.h>
@@ -428,6 +429,56 @@ static int raw_access(nand_info_t *nand, ulong addr, loff_t off, ulong count,
 	return ret;
 }
 
+static int erase_and_write_block(nand_info_t *nand, loff_t off, char *wbuff, char *rbuff)
+{
+	int i, err;
+	size_t retlen = 0;
+	struct erase_info erase;
+
+	// erase block
+	memset(&erase, 0, sizeof(erase));
+	erase.mtd = nand;
+	erase.addr = off;
+	erase.len = nand->erasesize;
+	if (nand->erase(nand, &erase))
+		goto bad_out;
+
+	for (i = 0; i < nand->erasesize / sizeof(unsigned int); i++)
+		((unsigned int *)wbuff)[i] = rand();
+
+	// write block
+	err = nand->write(nand, off, nand->erasesize, &retlen, (void *)wbuff);
+	if (err || retlen != nand->erasesize) {
+		printf("write block %010llx fail %d\n", off, err);
+		goto bad_out;
+	}
+
+	// read block
+	err = nand->read(nand, off, nand->erasesize, &retlen, (void *)rbuff);
+	if ((err && err != -EUCLEAN) || retlen != nand->erasesize) {
+		printf("read block %010llx fail %d\n", off, err);
+		goto bad_out;
+	}
+
+/*
+	if (err == -EUCLEAN)
+		printf("ECC corrected at block %010llx\n", off);
+*/
+
+	// compare data
+	if (memcmp(rbuff, wbuff, nand->erasesize)) {
+		printf("memcmp block %010llx fail\n", off);
+		goto bad_out;
+	}
+
+	return 0;
+
+bad_out:
+	printf("bad block at %010llx\n", off);
+	nand->block_markbad(nand, off);
+	return -1;
+}
+
 static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
 	int i, ret = 0;
@@ -745,6 +796,79 @@ static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		return ret;
 	}
 
+	// nand test [-k] [off] [size]
+	if (strcmp(cmd, "test") == 0) {
+		loff_t block_start, block_end, block_size;
+		int keep_data = argc > 2 && !strcmp("-k", argv[2]);
+		char *save_buffer, *write_buffer, *read_buffer;
+		int pos = keep_data ? 3 : 2;
+		int index = 0;
+
+		if (arg_off_size(argc - pos, argv + pos, &index, &block_start, &block_size)) {
+			printf("invalid arguments\n");
+			return -EINVAL;
+		}
+
+		write_buffer = malloc(nand->erasesize);
+		if (write_buffer == NULL) {
+			printf("alloc write buffer fail\n");
+			return -ENOMEM;
+		}
+
+		read_buffer = malloc(nand->erasesize);
+		if (read_buffer == NULL) {
+			printf("alloc read buffer fail\n");
+			free(write_buffer);
+			return -ENOMEM;
+		}
+
+		if (keep_data) {
+			save_buffer = malloc(nand->erasesize);
+			if (save_buffer == NULL) {
+				printf("alloc save buffer fail\n");
+				free(read_buffer);
+				free(write_buffer);
+				return -ENOMEM;
+			}
+		}
+
+		block_end = block_start + block_size;
+		block_start &= ~(typeof(block_start))(nand->erasesize - 1);
+		for ( ; block_start < block_end; block_start += nand->erasesize) {
+			int err, data_saved = 0;
+			size_t retlen = 0;
+
+			if (!(block_start % (nand->erasesize * 128)))
+				printf("check block at %010llx\n", block_start);
+
+			// check bad block
+			if (nand->block_isbad(nand, block_start)) {
+				printf("bad block at %010llx\n", block_start);
+				continue;
+			}
+
+			// save origin data
+			if (keep_data) {
+				err = nand->read(nand, block_start, nand->erasesize, &retlen, (void *)save_buffer);
+				if ((err == 0 || err == -EUCLEAN) && (retlen == nand->erasesize))
+					data_saved = 1;
+			}
+
+			// erase and write test
+			if (erase_and_write_block(nand, block_start, write_buffer, read_buffer))
+				continue;
+
+			// restore data
+			if (data_saved)
+				erase_and_write_block(nand, block_start, save_buffer, read_buffer);
+		}
+
+		free(save_buffer);
+		free(read_buffer);
+		free(write_buffer);
+		return 0;
+	}
+
 	if (strcmp(cmd, "biterr") == 0) {
 		/* todo */
 		return 1;
@@ -835,6 +959,7 @@ static char nand_help_text[] =
 	"nand scrub [-y] off size | scrub.part partition | scrub.chip\n"
 	"    really clean NAND erasing bad blocks (UNSAFE)\n"
 	"nand markbad off [...] - mark bad block(s) at offset (UNSAFE)\n"
+	"nand test [-k] [off] [size] - test the whole flash chip for bad blocks\n"
 	"nand biterr off - make a bit error at offset (UNSAFE)"
 #ifdef CONFIG_CMD_NAND_LOCK_UNLOCK
 	"\n"

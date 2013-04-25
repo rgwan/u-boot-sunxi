@@ -412,7 +412,7 @@ static int part_validate(struct mtdids *id, struct part_info *part)
 		part->size = id->size - part->offset;
 
 	if (part->offset > id->size) {
-		printf("%s: offset %08x beyond flash size %08x\n",
+		printf("%s: offset %010llx beyond flash size %010llx\n",
 				id->mtd_id, part->offset, id->size);
 		return 1;
 	}
@@ -694,7 +694,7 @@ static int part_parse(const char *const partdef, const char **ret, struct part_i
 	part->name[name_len - 1] = '\0';
 	INIT_LIST_HEAD(&part->link);
 
-	debug("+ partition: name %-22s size 0x%08x offset 0x%08x mask flags %d\n",
+	debug("+ partition: name %-22s size 0x%08llx offset 0x%08llx mask flags %d\n",
 			part->name, part->size,
 			part->offset, part->mask_flags);
 
@@ -1314,7 +1314,7 @@ static void list_partitions(void)
 	if (current_mtd_dev) {
 		part = mtd_part_info(current_mtd_dev, current_mtd_partnum);
 		if (part) {
-			printf("\nactive partition: %s%d,%d - (%s) 0x%08x @ 0x%08x\n",
+			printf("\nactive partition: %s%d,%d - (%s) 0x%08llx @ 0x%08llx\n",
 					MTD_DEV_TYPE(current_mtd_dev->id->type),
 					current_mtd_dev->id->num, current_mtd_partnum,
 					part->name, part->size, part->offset);
@@ -1414,7 +1414,7 @@ static int delete_partition(const char *id)
 
 	if (find_dev_and_part(id, &dev, &pnum, &part) == 0) {
 
-		debug("delete_partition: device = %s%d, partition %d = (%s) 0x%08x@0x%08x\n",
+		debug("delete_partition: device = %s%d, partition %d = (%s) 0x%08llx@0x%08llx\n",
 				MTD_DEV_TYPE(dev->id->type), dev->id->num, pnum,
 				part->name, part->size, part->offset);
 
@@ -1674,7 +1674,7 @@ static int parse_mtdids(const char *const ids)
 		id->mtd_id[mtd_id_len - 1] = '\0';
 		INIT_LIST_HEAD(&id->link);
 
-		debug("+ id %s%d\t%16d bytes\t%s\n",
+		debug("+ id %s%d\t%16lld bytes\t%s\n",
 				MTD_DEV_TYPE(id->type), id->num,
 				id->size, id->mtd_id);
 

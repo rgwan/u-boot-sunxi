@@ -68,6 +68,8 @@ static void nfc_read_page(uint32_t offs, void *buff)
 	wait_cmdfifo_free();
 	wait_cmd_finish();
 	disable_ecc();
+	if (check_ecc((page_size / 1024) < 0)
+		error("can't correct bit error of page read at offset %x\n", off);
 }
 
 static void nfc_reset(void)

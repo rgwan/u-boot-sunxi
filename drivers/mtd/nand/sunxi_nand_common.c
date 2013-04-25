@@ -152,7 +152,7 @@ int check_ecc(int eblock_cnt)
 	int i;
     int ecc_mode;
 	int max_ecc_bit_cnt = 16;
-	int cfg;
+	int cfg, corrected = 0;
 
 	ecc_mode = (readl(NFC_REG_ECC_CTL) & NFC_ECC_MODE) >> NFC_ECC_MODE_SHIFT;
 	if(ecc_mode == 0)
@@ -188,14 +188,16 @@ int check_ecc(int eblock_cnt)
 		int j, n = (eblock_cnt - i) < 4 ? (eblock_cnt - i) : 4;
 		cfg = readl(NFC_REG_ECC_CNT0 + i);
 		for (j = 0; j < n; j++, cfg >>= 8) {
-			if ((cfg & 0xff) >= max_ecc_bit_cnt - 4) {
-				error("ECC limit %d/%d\n", (cfg & 0xff), max_ecc_bit_cnt);
+			int bits = cfg & 0xff;
+			if (bits >= max_ecc_bit_cnt - 4) {
+				error("ECC limit %d/%d\n", bits, max_ecc_bit_cnt);
 				//return -1;
 			}
+			corrected += bits;
 		}
 	}
 
-	return 0;
+	return corrected;
 }
 
 void disable_ecc(void)
