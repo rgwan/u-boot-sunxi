@@ -429,7 +429,7 @@ static int raw_access(nand_info_t *nand, ulong addr, loff_t off, ulong count,
 	return ret;
 }
 
-static int erase_and_write_block(nand_info_t *nand, loff_t off, char *wbuff, char *rbuff)
+static int erase_and_write_block(nand_info_t *nand, loff_t off, char *wbuff, char *rbuff, int option)
 {
 	int i, err;
 	size_t retlen = 0;
@@ -443,8 +443,14 @@ static int erase_and_write_block(nand_info_t *nand, loff_t off, char *wbuff, cha
 	if (nand->erase(nand, &erase))
 		goto bad_out;
 
-	for (i = 0; i < nand->erasesize / sizeof(unsigned int); i++)
-		((unsigned int *)wbuff)[i] = rand();
+	// skip write test
+	if (option == 1)
+		return 0;
+
+	// write test
+	if (option == 0)
+		for (i = 0; i < nand->erasesize / sizeof(unsigned int); i++)
+			((unsigned int *)wbuff)[i] = rand();
 
 	// write block
 	err = nand->write(nand, off, nand->erasesize, &retlen, (void *)wbuff);
@@ -452,6 +458,10 @@ static int erase_and_write_block(nand_info_t *nand, loff_t off, char *wbuff, cha
 		printf("write block %010llx fail %d\n", off, err);
 		goto bad_out;
 	}
+
+	// restore data
+	if (option == 2)
+		return 0;
 
 	// read block
 	err = nand->read(nand, off, nand->erasesize, &retlen, (void *)rbuff);
@@ -796,13 +806,32 @@ static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		return ret;
 	}
 
-	// nand test [-k] [off] [size]
+	// nand test [-k] [-s] [off] [size]
 	if (strcmp(cmd, "test") == 0) {
 		loff_t block_start, block_end, block_size;
-		int keep_data = argc > 2 && !strcmp("-k", argv[2]);
+		int keep_data = 0, skip_write = 0;
 		char *save_buffer, *write_buffer, *read_buffer;
-		int pos = keep_data ? 3 : 2;
+		int pos = 2;
 		int index = 0;
+
+		if (argc >= 3) {
+			if (!strcmp("-k", argv[2]))
+				keep_data = 1;
+			else if (!strcmp("-s", argv[2]))
+				skip_write = 1;
+
+			if (argc > 3) {
+				if (!strcmp("-k", argv[3]))
+					keep_data = 1;
+				else if (!strcmp("-s", argv[3]))
+					skip_write = 1;
+			}
+		}
+
+		if (keep_data)
+			pos++;
+		if (skip_write)
+			pos++;
 
 		if (arg_off_size(argc - pos, argv + pos, &index, &block_start, &block_size)) {
 			printf("invalid arguments\n");
@@ -855,12 +884,12 @@ static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 			}
 
 			// erase and write test
-			if (erase_and_write_block(nand, block_start, write_buffer, read_buffer))
+			if (erase_and_write_block(nand, block_start, write_buffer, read_buffer, skip_write))
 				continue;
 
 			// restore data
 			if (data_saved)
-				erase_and_write_block(nand, block_start, save_buffer, read_buffer);
+				erase_and_write_block(nand, block_start, save_buffer, read_buffer, 2);
 		}
 
 		free(save_buffer);
@@ -959,7 +988,7 @@ static char nand_help_text[] =
 	"nand scrub [-y] off size | scrub.part partition | scrub.chip\n"
 	"    really clean NAND erasing bad blocks (UNSAFE)\n"
 	"nand markbad off [...] - mark bad block(s) at offset (UNSAFE)\n"
-	"nand test [-k] [off] [size] - test the whole flash chip for bad blocks\n"
+	"nand test [-k] [-s] [off] [size] - test the whole flash chip for bad blocks\n"
 	"nand biterr off - make a bit error at offset (UNSAFE)"
 #ifdef CONFIG_CMD_NAND_LOCK_UNLOCK
 	"\n"
