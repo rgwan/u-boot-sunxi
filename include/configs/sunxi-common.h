@@ -216,15 +216,15 @@
 	"mtdparts=mtdparts=mtd-nand-sunxi.0:1M(spl),4M(uboot),3M(env),3M(fdt),3M(splash),3M(script),8M(kernel),64M(initfs),-(rootfs)\0" \
 																		\
 	"loadaddr=0x44000000\0"												\
-	"fl_spl=nand erase 0 0x100000 && nand write ${loadaddr} 0 0x100000\0" \
-	"fl_uboot=nand erase 0x100000 0x400000 && nand write ${loadaddr} 0x100000 0x100000\0" \
-	"fl_env=nand erase 0x500000 0x300000 && nand write ${loadaddr} 0x500000 0x100000\0" \
-	"fl_fdt=nand erase 0x800000 0x300000 && nand write ${loadaddr} 0x800000 0x100000\0" \
-	"fl_splash=nand erase 0xb00000 0x300000 && nand write ${loadaddr} 0xb00000 0x100000\0" \
-	"fl_script=nand erase 0xe00000 0x300000 && nand write ${loadaddr} 0xe00000 0x100000\0" \
-	"fl_kernel=nand erase 0x1100000 0x800000 && nand write ${loadaddr} 0x1100000 0x500000\0" \
-	"fl_initfs=nand erase 0x1900000 0x4000000 && nand write ${loadaddr} 0x1900000 0x2000000\0" \
-	"fl_rootfs=nand erase 0x1d00000 0x8000000 && "						\
+	"fl_spl=nand erase.part spl && nand write ${loadaddr} spl 0x100000\0" \
+	"fl_uboot=nand erase.part uboot && nand write ${loadaddr} uboot 0x100000\0" \
+	"fl_env=nand erase.part env && nand write ${loadaddr} env 0x100000\0" \
+	"fl_fdt=nand erase.part fdt && nand write ${loadaddr} fdt 0x100000\0" \
+	"fl_splash=nand erase.part splash && nand write ${loadaddr} splash 0x100000\0" \
+	"fl_script=nand erase.part script && nand write ${loadaddr} script 0x100000\0" \
+	"fl_kernel=nand erase.part kernel && nand write ${loadaddr} kernel 0x500000\0" \
+	"fl_initfs=nand erase.part initfs && nand write ${loadaddr} initfs 0x2000000\0" \
+	"fl_rootfs=nand erase.part rootfs && "								\
 	"  ubi part rootfs && "												\
 	"  ubi create rootfs 0x8000000 && "									\
 	"  ubi create user-data && "										\
@@ -303,24 +303,24 @@
 #define CONFIG_ENV_OFFSET		0x500000
 #define CONFIG_ENV_RANGE        0x300000
 
-#define CONFIG_EXTRA_ENV_SETTINGS										\
-	"kernel_loadaddr=0x47ffffc0\0"										\
-	"script_loadaddr=0x42ffffc0\0"										\
-	"splash_loadaddr=0x430fffc0\0"										\
-	"console=ttyS0,115200n8\0"											\
-	"nandargs=setenv bootargs console=${console} init=/linuxrc "		\
-	"mtdparts=mtd-nand-sunxi.0:14M@0xb00000,64M,- ubi.mtd=2 "			\
-	"root=ubi0:rootfs rootwait rootfstype=ubifs "						\
-	"root2=10:/dev/blockrom1,squashfs,/init "							\
-	"quiet\0"															\
-	"nandboot=run nandargs; "											\
-	"nand read ${script_loadaddr} 0xe00000 0x10000; "					\
-	"nand read ${splash_loadaddr} 0xb00000 0x10000; "					\
-	"nand read ${kernel_loadaddr} 0x1100000 0x500000; "					\
-	"bootm ${kernel_loadaddr}\0"										\
-	"bootcmd=run nandboot\0"											\
-	"bootdelay=5\0"														\
-	"cleanenv=nand erase 0x500000 0x300000\0"							\
+#define CONFIG_EXTRA_ENV_SETTINGS									\
+	"kernel_loadaddr=0x47ffffc0\0"									\
+	"script_loadaddr=0x42ffffc0\0"									\
+	"splash_loadaddr=0x430fffc0\0"									\
+	"console=ttyS0,115200n8\0"										\
+	"nandargs=setenv bootargs console=${console} init=/linuxrc "	\
+	"mtdparts=mtd-nand-sunxi.0:14M@0xb00000,64M,- ubi.mtd=2 "		\
+	"root=ubi0:rootfs rootwait rootfstype=ubifs "					\
+	"root2=10:/dev/blockrom1,squashfs,/init "						\
+	"quiet\0"														\
+	"nandboot=run nandargs; "										\
+	"nand read ${script_loadaddr} script 0x10000; "					\
+	"nand read ${splash_loadaddr} splash 0x10000; "					\
+	"nand read ${kernel_loadaddr} kernel 0x500000; "				\
+	"bootm ${kernel_loadaddr}\0"									\
+	"bootcmd=run nandboot\0"										\
+	"bootdelay=5\0"													\
+	"cleanenv=nand erase.part env\0"								\
 	SHARE_BOOT_ENV
 
 #endif /* CONFIG_NAND */
