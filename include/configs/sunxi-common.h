@@ -216,19 +216,19 @@
 	"mtdparts=mtdparts=mtd-nand-sunxi.0:1M(spl),4M(uboot),3M(env),3M(fdt),3M(splash),3M(script),8M(kernel),64M(initfs),-(rootfs)\0" \
 																		\
 	"loadaddr=0x44000000\0"												\
-	"fl_spl=nand erase.part spl && nand write ${loadaddr} spl 0x100000\0" \
-	"fl_uboot=nand erase.part uboot && nand write ${loadaddr} uboot 0x100000\0" \
-	"fl_env=nand erase.part env && nand write ${loadaddr} env 0x100000\0" \
-	"fl_fdt=nand erase.part fdt && nand write ${loadaddr} fdt 0x100000\0" \
-	"fl_splash=nand erase.part splash && nand write ${loadaddr} splash 0x100000\0" \
-	"fl_script=nand erase.part script && nand write ${loadaddr} script 0x100000\0" \
-	"fl_kernel=nand erase.part kernel && nand write ${loadaddr} kernel 0x500000\0" \
-	"fl_initfs=nand erase.part initfs && nand write ${loadaddr} initfs 0x2000000\0" \
+	"fl_spl=nand erase.part spl && nand write ${loadaddr} spl ${filesize}\0" \
+	"fl_uboot=nand erase.part uboot && nand write ${loadaddr} uboot ${filesize}\0" \
+	"fl_env=nand erase.part env && nand write ${loadaddr} env ${filesize}\0" \
+	"fl_fdt=nand erase.part fdt && nand write ${loadaddr} fdt ${filesize}\0" \
+	"fl_splash=nand erase.part splash && nand write ${loadaddr} splash ${filesize}\0" \
+	"fl_script=nand erase.part script && nand write ${loadaddr} script ${filesize}\0" \
+	"fl_kernel=nand erase.part kernel && nand write ${loadaddr} kernel ${filesize}\0" \
+	"fl_initfs=nand erase.part initfs && nand write ${loadaddr} initfs ${filesize}\0" \
 	"fl_rootfs=nand erase.part rootfs && "								\
 	"  ubi part rootfs && "												\
 	"  ubi create rootfs 0x8000000 && "									\
 	"  ubi create user-data && "										\
-	"  ubi write ${loadaddr} rootfs 0x4000000\0"						\
+	"  ubi write ${loadaddr} rootfs ${filesize}\0"						\
 																		\
 	"tf_spl=tftp ${loadaddr} spl.bin && run fl_spl\0"					\
 	"tf_uboot=tftp ${loadaddr} u-boot.bin && run fl_uboot\0"			\
