@@ -359,7 +359,7 @@ int board_nand_init(struct nand_chip *nand)
 	u32 ctl;
 	int i, j;
 	uint8_t id[8];
-	struct nand_chip_param *chip_param = NULL;
+	struct nand_chip_param *nand_chip_param, *chip_param = NULL;
 
 	debug("board_nand_init start\n");
 
@@ -393,6 +393,7 @@ int board_nand_init(struct nand_chip *nand)
 		id[i] = nfc_read_byte(NULL);
 
 	// find chip
+	nand_chip_param = sunxi_get_nand_chip_param(id[0]);
 	for (i = 0; nand_chip_param[i].id_len; i++) {
 		int find = 1;
 		for (j = 0; j < nand_chip_param[i].id_len; j++) {
@@ -417,8 +418,8 @@ int board_nand_init(struct nand_chip *nand)
 	// set final NFC clock freq
 	if (chip_param->clock_freq > 30)
 		chip_param->clock_freq = 30;
-	sunxi_nand_set_clock(chip_param->clock_freq * 1000000);
-	debug("set final clock freq to %dMHz\n", chip_param->clock_freq);
+	sunxi_nand_set_clock((int)chip_param->clock_freq * 1000000);
+	debug("set final clock freq to %dMHz\n", (int)chip_param->clock_freq);
 
 	// disable interrupt
 	writel(0, NFC_REG_INT);
@@ -428,7 +429,7 @@ int board_nand_init(struct nand_chip *nand)
 	// set ECC mode
 	ctl = readl(NFC_REG_ECC_CTL);
 	ctl &= ~NFC_ECC_MODE;
-	ctl |= chip_param->ecc_mode << NFC_ECC_MODE_SHIFT;
+	ctl |= (unsigned int)chip_param->ecc_mode << NFC_ECC_MODE_SHIFT;
 	writel(ctl, NFC_REG_ECC_CTL);
 
 	// enable NFC
@@ -436,30 +437,30 @@ int board_nand_init(struct nand_chip *nand)
 
 	// Page size
 	if (chip_param->page_shift > 14 || chip_param->page_shift < 10) {
-		error("Flash chip page shift out of range %d\n", chip_param->page_shift);
+		error("Flash chip page shift out of range %d\n", (int)chip_param->page_shift);
 		return -EINVAL;
 	}
 	// 0 for 1K
-	ctl |= ((chip_param->page_shift - 10) & 0xf) << 8;
+	ctl |= (((int)chip_param->page_shift - 10) & 0xf) << 8;
 	writel(ctl, NFC_REG_CTL);
 
 	writel(0xff, NFC_REG_TIMING_CFG);
-	writel(1 << chip_param->page_shift, NFC_REG_SPARE_AREA);
+	writel(1U << chip_param->page_shift, NFC_REG_SPARE_AREA);
 
 	// disable random
 	disable_random();
 
 	// setup ECC layout
 	sunxi_ecclayout.eccbytes = 0;
-	sunxi_ecclayout.oobavail = (1 << chip_param->page_shift) / 1024 * 4 - 2;
+	sunxi_ecclayout.oobavail = (1U << chip_param->page_shift) / 1024 * 4 - 2;
 	sunxi_ecclayout.oobfree->offset = 1;
-	sunxi_ecclayout.oobfree->length = (1 << chip_param->page_shift) / 1024 * 4 - 2;
+	sunxi_ecclayout.oobfree->length = (1U << chip_param->page_shift) / 1024 * 4 - 2;
 	nand->ecc.layout = &sunxi_ecclayout;
-	nand->ecc.size = (1 << chip_param->page_shift);
+	nand->ecc.size = (1U << chip_param->page_shift);
 	nand->ecc.bytes = 0;
 
 	// set buffer size
-	buffer_size = (1 << chip_param->page_shift) + 1024;
+	buffer_size = (1U << chip_param->page_shift) + 1024;
 
 	// setup DMA
 	dma_hdle = DMA_Request(DMAC_DMATYPE_DEDICATED);

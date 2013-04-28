@@ -143,13 +143,15 @@
 
 struct nand_chip_param {
 	unsigned char id[8];
-	int id_len;
-	int page_shift;
-	int clock_freq; //the highest access frequence of the nand flash chip, based on MHz
-	int ecc_mode;   //the Ecc Mode for the nand flash chip, 0: bch-16, 1:bch-28, 2:bch_32
+	unsigned char id_len;
+	unsigned char page_shift;
+	unsigned char page_per_block_shift;
+	unsigned char clock_freq; //the highest access frequence of the nand flash chip, based on MHz
+	unsigned char ecc_mode;   //the Ecc Mode for the nand flash chip, 0: bch-16, 1:bch-28, 2:bch_32
 };
 
-extern struct nand_chip_param nand_chip_param[];
+struct nand_chip_param *sunxi_get_nand_chip_param(unsigned char mf);
+
 extern int dma_hdle;
 
 #define NAND_MAX_CLOCK (10 * 1000000)

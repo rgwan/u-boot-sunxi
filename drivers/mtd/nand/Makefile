@@ -79,6 +79,7 @@ COBJS-$(CONFIG_TEGRA_NAND) += tegra_nand.o
 COBJS-$(CONFIG_NAND_OMAP_GPMC) += omap_gpmc.o
 COBJS-$(CONFIG_NAND_PLAT) += nand_plat.o
 COBJS-$(CONFIG_NAND_SUNXI) += sunxi_nand_common.o
+COBJS-$(CONFIG_NAND_SUNXI) += sunxi_nand_id.o
 ifdef CONFIG_SPL_BUILD
 COBJS-$(CONFIG_NAND_SUNXI) += sunxi_nand_spl.o
 else

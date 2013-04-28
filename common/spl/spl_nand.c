@@ -27,6 +27,11 @@
 #include <nand.h>
 #include <image.h>
 
+#ifdef CONFIG_SUNXI
+
+extern int sunxi_nand_spl_page_size;
+extern int sunxi_nand_spl_block_size;
+
 static void load_uimage(struct image_header *header, uint32_t offs)
 {
 	char *name;
@@ -47,6 +52,8 @@ static void load_uimage(struct image_header *header, uint32_t offs)
 	nand_spl_load_image(offs, size + sizeof(struct image_header), 
 						load_addr - sizeof(struct image_header));
 }
+
+#endif
 
 void spl_nand_load_image(void)
 {

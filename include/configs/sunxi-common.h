@@ -115,11 +115,8 @@
 #define CONFIG_SUNXI_SCRIPT_OFS         0xe00000
 #define CONFIG_SUNXI_SPLASH_OFS         0xb00000
 
-#ifdef CONFIG_EM6000
-#define CONFIG_SYS_NAND_PAGE_SIZE 0x2000
-#define CONFIG_SYS_NAND_BLOCK_SIZE 0x100000
-#define CONFIG_SYS_NAND_OOBSIZE 640
-#endif
+#define CONFIG_SYS_NAND_PAGE_SIZE sunxi_nand_spl_page_size
+#define CONFIG_SYS_NAND_BLOCK_SIZE sunxi_nand_spl_block_size
 
 /* mmc config */
 #elif CONFIG_MMC
