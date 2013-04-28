@@ -227,7 +227,6 @@
 	"fl_rootfs=nand erase.part rootfs && "								\
 	"  ubi part rootfs && "												\
 	"  ubi create rootfs 0x8000000 && "									\
-	"  ubi create user-data && "										\
 	"  ubi write ${loadaddr} rootfs ${filesize}\0"						\
 																		\
 	"tf_spl=tftp ${loadaddr} spl.bin && run fl_spl\0"					\
