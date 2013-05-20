@@ -149,7 +149,10 @@ int nand_unlock(nand_info_t *meminfo, loff_t start, size_t length,
 	int allexcept);
 int nand_get_lock_status(nand_info_t *meminfo, loff_t offset);
 
+int nand_spl_isbad(uint32_t offs);
+void nand_spl_read(uint32_t offs, int size, void *dst);
 int nand_spl_load_image(uint32_t offs, unsigned int size, void *dst);
+
 void nand_deselect(void);
 
 #ifdef CONFIG_SYS_NAND_SELECT_DEVICE

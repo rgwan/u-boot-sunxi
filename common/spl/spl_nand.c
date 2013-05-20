@@ -26,12 +26,14 @@
 #include <asm/io.h>
 #include <nand.h>
 #include <image.h>
+#include <packimg.h>
 
 #ifdef CONFIG_SUNXI
 
 extern int sunxi_nand_spl_page_size;
 extern int sunxi_nand_spl_block_size;
 
+/*
 static void load_uimage(struct image_header *header, uint32_t offs)
 {
 	char *name;
@@ -52,6 +54,98 @@ static void load_uimage(struct image_header *header, uint32_t offs)
 	nand_spl_load_image(offs, size + sizeof(struct image_header), 
 						load_addr - sizeof(struct image_header));
 }
+*/
+
+static uint32_t calc_crc(void *buff, int size)
+{
+	int i;
+	uint32_t ret = 0;
+	for (i = 0; i < size; i += 4)
+		ret += *(uint32_t *)(buff + i);
+	return ret;
+}
+
+static int block_isbad(char *record, uint32_t start, uint32_t offs)
+{
+	int ret;
+	int i = (offs - start) / CONFIG_SYS_NAND_BLOCK_SIZE;
+	if (record[i] == 0) {
+		ret = nand_spl_isbad(offs);
+		if (ret)
+			record[i] = 1;
+		else
+			record[i] = 2;
+	}
+	else {
+		ret = record[i] == 1 ? 1 : 0;
+	}
+	return ret;
+}
+
+static void read_skip_bad(char *record, uint32_t start, 
+						  uint32_t offs, uint32_t image_size, void *dst)
+{
+	int size = image_size;
+	uint32_t to, len, bound;
+
+	while (size > 0) {
+		if (block_isbad(record, start, offs)) {
+			offs += CONFIG_SYS_NAND_BLOCK_SIZE;
+			continue;
+		}
+			
+		to = roundup(offs, CONFIG_SYS_NAND_BLOCK_SIZE);
+		bound = (to == offs) ? CONFIG_SYS_NAND_BLOCK_SIZE : (to - offs);
+		len = bound > size ? size : bound;
+		nand_spl_read(offs, len, dst);
+		offs += len;
+		dst += len;
+		size -= len;
+	}
+}
+
+static void load_packimg(uint32_t start, uint32_t end, void *buff)
+{
+	int i, success = 0;
+	struct pack_header *ph;
+	struct pack_entry *pe;
+	uint32_t offs = start, crc;
+	int nblocks = (end - start) / CONFIG_SYS_NAND_BLOCK_SIZE;
+	char record[nblocks];
+	memset(record, 0, nblocks);
+
+	while (offs < end) {
+		read_skip_bad(record, start, offs, CONFIG_SYS_NAND_PAGE_SIZE, buff);
+		ph = buff;
+		pe = buff + sizeof(*ph);
+
+		// check valid header
+		if (ph->magic != PACK_MAGIC)
+			goto next_block;
+		crc = calc_crc(pe, ph->nentry * sizeof(*pe));
+		if (ph->crc != crc)
+			goto next_block;
+
+		// load all entries
+		for (i = 0; i < ph->nentry; i++) {
+			read_skip_bad(record, start, offs + pe[i].offset, pe[i].size, (void *)pe[i].ldaddr);
+			crc = calc_crc((void *)pe[i].ldaddr, pe[i].size);
+			if (pe[i].crc != crc)
+				goto next_block;
+		}
+
+		debug("load packimg at %x success\n", offs);
+		success = 1;
+		break;
+
+	next_block:
+		error("invalid packimg at offset %x\n", offs);
+		offs += CONFIG_SYS_NAND_BLOCK_SIZE;
+	}
+
+	if (!success)
+		error("load packimg from %x to %x fail\n", start, end);
+}
 
 #endif
 
@@ -70,12 +164,8 @@ void spl_nand_load_image(void)
 	if (!spl_start_uboot()) {
 
 #ifdef CONFIG_SUNXI
-		nand_spl_load_image(CONFIG_CMD_SPL_NAND_OFS,
-			CONFIG_CMD_SPL_WRITE_SIZE,
-			(void *)CONFIG_SYS_SPL_ARGS_ADDR);
-
-		load_uimage(header, CONFIG_SUNXI_SCRIPT_OFS);
-		load_uimage(header, CONFIG_SUNXI_SPLASH_OFS);
+		load_packimg(CONFIG_SUNXI_PACKIMG_START, CONFIG_SUNXI_PACKIMG_END, 
+					 (void *)CONFIG_SYS_TEXT_BASE);
 #else
 		/*
 		 * load parameter image

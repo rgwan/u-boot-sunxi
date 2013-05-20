@@ -228,7 +228,12 @@ static int nfc_init(void)
 	return 0;
 }
 
-static void nand_spl_read(uint32_t offs, int size, void *dst)
+int nand_spl_isbad(uint32_t offs)
+{
+	return nfc_isbad(offs);
+}
+
+void nand_spl_read(uint32_t offs, int size, void *dst)
 {
 	// offs must be page aligned
 	while (size > 0) {
@@ -247,7 +252,7 @@ int nand_spl_load_image(uint32_t offs, unsigned int image_size, void *dst)
 	debug("nand spl load image from %x to %x size %x\n", offs, dst, size);
 
 	while (size > 0) {
-		if (nfc_isbad(offs)) {
+		if (nand_spl_isbad(offs)) {
 			debug("nand spl block %x is bad\n", offs);
 			offs += sunxi_nand_spl_block_size;
 			continue;
