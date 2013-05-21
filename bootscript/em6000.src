@@ -1,27 +1,21 @@
 kernel_loadaddr=0x47ffffc0
-script_loadaddr=0x42ffffc0
-splash_loadaddr=0x430fffc0
 console=ttyS0,115200n8
-nandargs=setenv bootargs console=${console} init=/linuxrc mtdparts=mtd-nand-sunxi.0:14M@0xb00000,64M,- ubi.mtd=2 root=ubi0:rootfs rootwait rootfstype=ubifs root2=10:/dev/blockrom1,squashfs,/init quiet
-nandboot=run nandargs && nand read ${script_loadaddr} script 0x10000 && nand read ${splash_loadaddr} splash 0x10000 && nand read ${kernel_loadaddr} kernel 0x500000 && bootm ${kernel_loadaddr}
+nandargs=setenv bootargs console=${console} init=/linuxrc mtdparts=mtd-nand-sunxi.0:17M@0x800000,64M,- ubi.mtd=2 root=ubi0:rootfs rootwait rootfstype=ubifs root2=10:/dev/blockrom1,squashfs,/init quiet
+nandboot=run nandargs && nand packimg read.part packimg && nand read ${kernel_loadaddr} kernel 0x500000 && bootm ${kernel_loadaddr}
 bootcmd=run nandboot
 bootdelay=5
 loadaddr=0x44000000
 fl_spl=nand erase.part spl && nand write ${loadaddr} spl ${filesize}
 fl_uboot=nand erase.part uboot && nand write ${loadaddr} uboot ${filesize}
 fl_env=nand erase.part env && nand write ${loadaddr} env ${filesize}
-fl_fdt=nand erase.part fdt && nand write ${loadaddr} fdt ${filesize}
-fl_splash=nand erase.part splash && nand write ${loadaddr} splash ${filesize}
-fl_script=nand erase.part script && nand write ${loadaddr} script ${filesize}
+fl_packimg=nand packimg write.part packimg ${loadaddr} ${filesize} 5
 fl_kernel=nand erase.part kernel && nand write ${loadaddr} kernel ${filesize}
 fl_initfs=nand erase.part initfs && nand write ${loadaddr} initfs ${filesize}
 fl_rootfs=nand erase.part rootfs && ubi part rootfs && ubi create rootfs 0x8000000 && ubi write ${loadaddr} rootfs ${filesize}
 tf_spl=tftp ${loadaddr} spl.bin && run fl_spl
 tf_uboot=tftp ${loadaddr} u-boot.bin && run fl_uboot
 tf_env=tftp ${loadaddr} em6000.env && run fl_env
-tf_fdt=tftp ${loadaddr} em6000.dtb && run fl_fdt
-tf_splash=tftp ${loadaddr} usplash.bin && run fl_splash
-tf_script=tftp ${loadaddr} uscript.bin && run fl_script
+tf_packimg=tftp ${loadaddr} pack.img && run fl_packimg
 tf_kernel=tftp ${loadaddr} uImage && run fl_kernel
 tf_initfs=tftp ${loadaddr} initfs.img && run fl_initfs
 tf_rootfs=tftp ${loadaddr} rootfs.img && run fl_rootfs
@@ -30,4 +24,4 @@ ethaddr=44:37:e6:28:3b:80
 serverip=192.168.0.10
 ipaddr=192.168.0.114
 mtdids=nand0=mtd-nand-sunxi.0
-mtdparts=mtdparts=mtd-nand-sunxi.0:1M(spl),4M(uboot),3M(env),3M(fdt),3M(splash),3M(script),8M(kernel),64M(initfs),-(rootfs)
+mtdparts=mtdparts=mtd-nand-sunxi.0:1M(spl),4M(uboot),3M(env),9M(packimg),8M(kernel),64M(initfs),-(rootfs)

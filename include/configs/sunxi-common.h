@@ -95,6 +95,8 @@
 #define CONFIG_CMD_MTDPARTS
 #define CONFIG_CMD_UBI
 #define CONFIG_CMD_UBIFS
+#define CONFIG_PACKIMG
+#define CONFIG_CMD_NAND_PACKIMG
 
 /* Nand config */
 #ifdef CONFIG_NAND
@@ -208,15 +210,13 @@
 	"ipaddr=192.168.0.114\0"											\
 																		\
 	"mtdids=nand0=mtd-nand-sunxi.0\0"									\
-	"mtdparts=mtdparts=mtd-nand-sunxi.0:1M(spl),4M(uboot),3M(env),3M(fdt),3M(splash),3M(script),8M(kernel),64M(initfs),-(rootfs)\0" \
+	"mtdparts=mtdparts=mtd-nand-sunxi.0:1M(spl),4M(uboot),3M(env),9M(packimg),8M(kernel),64M(initfs),-(rootfs)\0" \
 																		\
 	"loadaddr=0x44000000\0"												\
 	"fl_spl=nand erase.part spl && nand write ${loadaddr} spl ${filesize}\0" \
 	"fl_uboot=nand erase.part uboot && nand write ${loadaddr} uboot ${filesize}\0" \
 	"fl_env=nand erase.part env && nand write ${loadaddr} env ${filesize}\0" \
-	"fl_fdt=nand erase.part fdt && nand write ${loadaddr} fdt ${filesize}\0" \
-	"fl_splash=nand erase.part splash && nand write ${loadaddr} splash ${filesize}\0" \
-	"fl_script=nand erase.part script && nand write ${loadaddr} script ${filesize}\0" \
+	"fl_packimg=nand packimg write.part packimg ${loadaddr} ${filesize} 5\0" \
 	"fl_kernel=nand erase.part kernel && nand write ${loadaddr} kernel ${filesize}\0" \
 	"fl_initfs=nand erase.part initfs && nand write ${loadaddr} initfs ${filesize}\0" \
 	"fl_rootfs=nand erase.part rootfs && "								\
@@ -227,9 +227,7 @@
 	"tf_spl=tftp ${loadaddr} spl.bin && run fl_spl\0"					\
 	"tf_uboot=tftp ${loadaddr} u-boot.bin && run fl_uboot\0"			\
 	"tf_env=tftp ${loadaddr} em6000.env && run fl_env\0"				\
-	"tf_fdt=tftp ${loadaddr} em6000.dtb && run fl_fdt\0"				\
-	"tf_splash=tftp ${loadaddr} usplash.bin && run fl_splash\0"			\
-	"tf_script=tftp ${loadaddr} uscript.bin && run fl_script\0"			\
+	"tf_packimg=tftp ${loadaddr} pack.img && run fl_packimg\0"			\
 	"tf_kernel=tftp ${loadaddr} uImage && run fl_kernel\0"				\
 	"tf_initfs=tftp ${loadaddr} initfs.img && run fl_initfs\0"			\
 	"tf_rootfs=tftp ${loadaddr} rootfs.img && run fl_rootfs\0"			\
@@ -263,7 +261,7 @@
 	"loglevel=8\0"														\
 	"scriptaddr=0x44000000\0"											\
 	"setargs=setenv bootargs console=${console} root=${root}"			\
-	" mtdparts=mtd-nand-sunxi.0:1M,4M,3M,3M,3M,3M,8M,64M,-"				\
+	" mtdparts=mtd-nand-sunxi.0:1M,4M,3M,9M,8M,64M,-"					\
 	" loglevel=${loglevel} ${panicarg} ${extraargs}\0"					\
 	"kernel=uImage\0"													\
 	"bootenv=uEnv.txt\0"												\
@@ -282,9 +280,7 @@
 	"mf_spl=fatload mmc 0 ${loadaddr} spl.bin && run fl_spl\0"			\
 	"mf_uboot=fatload mmc 0 ${loadaddr} u-boot.bin && run fl_uboot\0"	\
 	"mf_env=fatload mmc 0 ${loadaddr} em6000.env && run fl_env\0"		\
-	"mf_fdt=fatload mmc 0 ${loadaddr} em6000.dtb && run fl_fdt\0"		\
-	"mf_splash=fatload mmc 0 ${loadaddr} usplash.bin && run fl_splash\0" \
-	"mf_script=fatload mmc 0 ${loadaddr} uscript.bin && run fl_script\0" \
+	"mf_packimg=fatload mmc 0 ${loadaddr} pack.img && run fl_packimg\0" \
 	"mf_kernel=fatload mmc 0 ${loadaddr} uImage && run fl_kernel\0"		\
 	"mf_initfs=fatload mmc 0 ${loadaddr} initfs.img && run fl_initfs\0"	\
 	"mf_rootfs=fatload mmc 0 ${loadaddr} rootfs.img && run fl_rootfs\0"	\
@@ -299,17 +295,14 @@
 
 #define CONFIG_EXTRA_ENV_SETTINGS									\
 	"kernel_loadaddr=0x47ffffc0\0"									\
-	"script_loadaddr=0x42ffffc0\0"									\
-	"splash_loadaddr=0x430fffc0\0"									\
 	"console=ttyS0,115200n8\0"										\
 	"nandargs=setenv bootargs console=${console} init=/linuxrc "	\
-	"mtdparts=mtd-nand-sunxi.0:14M@0xb00000,64M,- ubi.mtd=2 "		\
+	"mtdparts=mtd-nand-sunxi.0:17M@0x800000,64M,- ubi.mtd=2 "		\
 	"root=ubi0:rootfs rootwait rootfstype=ubifs "					\
 	"root2=10:/dev/blockrom1,squashfs,/init "						\
 	"quiet\0"														\
 	"nandboot=run nandargs; "										\
-	"nand read ${script_loadaddr} script 0x10000; "					\
-	"nand read ${splash_loadaddr} splash 0x10000; "					\
+	"nand packimg read.part packimg; "								\
 	"nand read ${kernel_loadaddr} kernel 0x500000; "				\
 	"bootm ${kernel_loadaddr}\0"									\
 	"bootcmd=run nandboot\0"										\

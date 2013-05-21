@@ -106,7 +106,7 @@ static void read_skip_bad(char *record, uint32_t start,
 
 static void load_packimg(uint32_t start, uint32_t end, void *buff)
 {
-	int i, success = 0;
+	int i;
 	struct pack_header *ph;
 	struct pack_entry *pe;
 	uint32_t offs = start, crc;
@@ -135,16 +135,14 @@ static void load_packimg(uint32_t start, uint32_t end, void *buff)
 		}
 
 		debug("load packimg at %x success\n", offs);
-		success = 1;
-		break;
+		return;
 
 	next_block:
 		error("invalid packimg at offset %x\n", offs);
 		offs += CONFIG_SYS_NAND_BLOCK_SIZE;
 	}
 
-	if (!success)
-		error("load packimg from %x to %x fail\n", start, end);
+	error("load packimg from %x to %x fail\n", start, end);
 }
 
 #endif
