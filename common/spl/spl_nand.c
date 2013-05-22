@@ -104,7 +104,7 @@ static void read_skip_bad(char *record, uint32_t start,
 	}
 }
 
-static void load_packimg(uint32_t start, uint32_t end, void *buff)
+static int load_packimg(uint32_t start, uint32_t end, void *buff)
 {
 	int i;
 	struct pack_header *ph;
@@ -135,7 +135,7 @@ static void load_packimg(uint32_t start, uint32_t end, void *buff)
 		}
 
 		debug("load packimg at %x success\n", offs);
-		return;
+		return 0;
 
 	next_block:
 		error("invalid packimg at offset %x\n", offs);
@@ -143,6 +143,7 @@ static void load_packimg(uint32_t start, uint32_t end, void *buff)
 	}
 
 	error("load packimg from %x to %x fail\n", start, end);
+	return -1;
 }
 
 #endif
@@ -162,8 +163,8 @@ void spl_nand_load_image(void)
 	if (!spl_start_uboot()) {
 
 #ifdef CONFIG_SUNXI
-		load_packimg(CONFIG_SUNXI_PACKIMG_START, CONFIG_SUNXI_PACKIMG_END, 
-					 (void *)CONFIG_SYS_TEXT_BASE);
+		if (load_packimg(CONFIG_SUNXI_PACKIMG_START, CONFIG_SUNXI_PACKIMG_END, (void *)CONFIG_SYS_TEXT_BASE))
+			goto uboot;
 #else
 		/*
 		 * load parameter image
@@ -202,6 +203,9 @@ void spl_nand_load_image(void)
 			puts("Trying to start u-boot now...\n");
 		}
 	}
+#endif
+#ifdef CONFIG_SUNXI
+uboot:
 #endif
 #ifdef CONFIG_NAND_ENV_DST
 	nand_spl_load_image(CONFIG_ENV_OFFSET,
