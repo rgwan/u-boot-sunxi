@@ -749,6 +749,16 @@ static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 				ret = nand->read_oob(nand, off, &ops);
 			else
 				ret = nand->write_oob(nand, off, &ops);
+#ifdef CONFIG_CMD_NAND_1K
+		} else if (!strcmp(s, ".1k")) {
+			int nand1k_read(char *buff, loff_t offs, size_t count);
+			int nand1k_write(const char *buff, loff_t offs, size_t count);
+			
+			if (read)
+				nand1k_read((char *)addr, off, size);
+			else
+				nand1k_write((char *)addr, off, size);
+#endif
 		} else if (raw) {
 			ret = raw_access(nand, addr, off, pagecount, read);
 		} else {
@@ -1063,6 +1073,11 @@ static char nand_help_text[] =
 	"nand packimg read.part partition\n"
 	"nand packimg write nand_off nand_size mem_off mem_size [max_copy]\n"
 	"nand packimg write.part partition mem_off mem_size [max_copy]"
+#endif
+#ifdef CONFIG_CMD_NAND_1K
+	"\n"
+	"nand read.1k - addr off|partition size\n"
+	"    write.1k - addr off|partition size\n"
 #endif
 	"";
 #endif

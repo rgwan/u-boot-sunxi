@@ -77,6 +77,9 @@ void enable_random(void)
 	uint32_t ctl;
 	ctl = readl(NFC_REG_ECC_CTL);
 	ctl |= NFC_RANDOM_EN;
+	ctl &= ~NFC_RANDOM_DIRECTION;
+	ctl &= ~NFC_RANDOM_SEED;
+	ctl |= (0x4a80 << 16);
 	writel(ctl, NFC_REG_ECC_CTL);
 }
 
@@ -158,6 +161,15 @@ int check_ecc(int eblock_cnt)
 	}
 
 	return corrected;
+}
+
+void set_ecc_mode(int mode)
+{
+	uint32_t ctl;
+	ctl = readl(NFC_REG_ECC_CTL);
+	ctl &= ~NFC_ECC_MODE;
+	ctl |= mode << NFC_ECC_MODE_SHIFT;
+	writel(ctl, NFC_REG_ECC_CTL);
 }
 
 void disable_ecc(void)

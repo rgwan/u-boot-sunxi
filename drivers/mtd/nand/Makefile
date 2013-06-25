@@ -84,6 +84,7 @@ ifdef CONFIG_SPL_BUILD
 COBJS-$(CONFIG_NAND_SUNXI) += sunxi_nand_spl.o
 else
 COBJS-$(CONFIG_NAND_SUNXI) += sunxi_nand.o
+COBJS-$(CONFIG_NAND_SUNXI) += sunxi_nand1k.o
 endif
 
 else  # minimal SPL drivers

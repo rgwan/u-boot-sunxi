@@ -332,6 +332,124 @@ static int nfc_ecc_correct(struct mtd_info *mtd, uint8_t *dat, uint8_t *read_ecc
 	return check_ecc(mtd->writesize / 1024);
 }
 
+//////////////////////////////////////////////////////////////////////////////////
+// 1K mode for SPL read/write
+
+struct save_1k_mode {
+	uint32_t ctl;
+	uint32_t ecc_ctl;
+	uint32_t spare_area;
+};
+
+static void enter_1k_mode(struct save_1k_mode *save)
+{
+	uint32_t ctl;
+
+	ctl = readl(NFC_REG_CTL);
+	save->ctl = ctl;
+	ctl &= ~NFC_PAGE_SIZE;
+	writel(ctl, NFC_REG_CTL);
+	
+	ctl = readl(NFC_REG_ECC_CTL);
+	save->ecc_ctl = ctl;
+	set_ecc_mode(8);
+
+	ctl = readl(NFC_REG_SPARE_AREA);
+	save->spare_area = ctl;
+	writel(1024, NFC_REG_SPARE_AREA);
+}
+
+static void exit_1k_mode(struct save_1k_mode *save)
+{
+	writel(save->ctl, NFC_REG_CTL);
+	writel(save->ecc_ctl, NFC_REG_ECC_CTL);
+	writel(save->spare_area, NFC_REG_SPARE_AREA);
+}
+
+void nfc_read_page1k(uint32_t page_addr, void *buff)
+{
+	struct save_1k_mode save;
+	uint32_t cfg = NAND_CMD_READ0 | NFC_SEQ | NFC_SEND_CMD1 | NFC_DATA_TRANS | NFC_SEND_ADR | 
+		NFC_SEND_CMD2 | ((5 - 1) << 16) | NFC_WAIT_FLAG | NFC_DATA_SWAP_METHOD | (2 << 30);
+
+	nfc_select_chip(NULL, 0);
+
+	wait_cmdfifo_free();
+
+	enter_1k_mode(&save);
+
+	writel(readl(NFC_REG_CTL) | NFC_RAM_METHOD, NFC_REG_CTL);
+	_dma_config_start(0, NFC_REG_IO_DATA, (uint32_t)buff, 1024);
+
+	writel(page_addr << 16, NFC_REG_ADDR_LOW);
+	writel(page_addr >> 16, NFC_REG_ADDR_HIGH);
+	writel(1024, NFC_REG_CNT);
+	writel(0x00e00530, NFC_REG_RCMD_SET);
+	writel(1, NFC_REG_SECTOR_NUM);
+
+	enable_random();
+
+	enable_ecc(1);
+
+	writel(cfg, NFC_REG_CMD);
+
+	_wait_dma_end();
+	wait_cmdfifo_free();
+	wait_cmd_finish();
+
+	disable_ecc();
+	check_ecc(1);
+
+	disable_random();
+
+	exit_1k_mode(&save);
+
+	nfc_select_chip(NULL, -1);
+}
+
+void nfc_write_page1k(uint32_t page_addr, void *buff)
+{
+	struct save_1k_mode save;
+	uint32_t cfg = NAND_CMD_SEQIN | NFC_SEQ | NFC_SEND_CMD1 | NFC_DATA_TRANS | NFC_SEND_ADR | 
+		NFC_SEND_CMD2 | ((5 - 1) << 16) | NFC_WAIT_FLAG | NFC_DATA_SWAP_METHOD | NFC_ACCESS_DIR | 
+		(2 << 30);
+
+	nfc_select_chip(NULL, 0);
+
+	wait_cmdfifo_free();
+
+	enter_1k_mode(&save);
+
+	writel(readl(NFC_REG_CTL) | NFC_RAM_METHOD, NFC_REG_CTL);
+	_dma_config_start(1, (uint32_t)buff, NFC_REG_IO_DATA, 1024);
+
+	writel(page_addr << 16, NFC_REG_ADDR_LOW);
+	writel(page_addr >> 16, NFC_REG_ADDR_HIGH);
+	writel(1024, NFC_REG_CNT);
+	writel(0x00008510, NFC_REG_WCMD_SET);
+	writel(1, NFC_REG_SECTOR_NUM);
+
+	enable_random();
+
+	enable_ecc(1);
+
+	writel(cfg, NFC_REG_CMD);
+
+	_wait_dma_end();
+	wait_cmdfifo_free();
+	wait_cmd_finish();
+
+	disable_ecc();
+
+	disable_random();
+
+	exit_1k_mode(&save);
+
+	nfc_select_chip(NULL, -1);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+
 static void print_nand_nfc(void)
 {
 	debug("=============== nand bfc ===============\n");

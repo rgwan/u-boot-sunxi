@@ -97,6 +97,7 @@
 #define CONFIG_CMD_UBIFS
 #define CONFIG_PACKIMG
 #define CONFIG_CMD_NAND_PACKIMG
+#define CONFIG_CMD_NAND_1K
 
 /* Nand config */
 #ifdef CONFIG_NAND
@@ -213,7 +214,9 @@
 	"mtdparts=mtdparts=mtd-nand-sunxi.0:1M(spl),4M(uboot),3M(env),9M(packimg),8M(kernel),64M(initfs),-(rootfs)\0" \
 																		\
 	"loadaddr=0x44000000\0"												\
-	"fl_spl=nand erase.part spl && nand write ${loadaddr} spl ${filesize}\0" \
+	"fl_spl=nand erase.part spl && "									\
+	"  nand write.1k ${loadaddr} 0 ${filesize} && "						\
+	"  nand write.1k ${loadaddr} 0x10000 ${filesize}\0"					\
 	"fl_uboot=nand erase.part uboot && nand write ${loadaddr} uboot ${filesize}\0" \
 	"fl_env=nand erase.part env && nand write ${loadaddr} env ${filesize}\0" \
 	"fl_packimg=nand packimg write.part packimg ${loadaddr} ${filesize} 5\0" \
@@ -224,7 +227,7 @@
 	"  ubi create rootfs 0x8000000 && "									\
 	"  ubi write ${loadaddr} rootfs ${filesize}\0"						\
 																		\
-	"tf_spl=tftp ${loadaddr} spl.bin && run fl_spl\0"					\
+	"tf_spl=tftp ${loadaddr} sunxi-spl.bin && run fl_spl\0"				\
 	"tf_uboot=tftp ${loadaddr} u-boot.bin && run fl_uboot\0"			\
 	"tf_env=tftp ${loadaddr} em6000.env && run fl_env\0"				\
 	"tf_packimg=tftp ${loadaddr} pack.img && run fl_packimg\0"			\

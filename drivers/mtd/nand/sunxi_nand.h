@@ -121,7 +121,7 @@
 #define NFC_RANDOM_DIRECTION    (1 << 10 )
 #define NFC_ECC_MODE_SHIFT      12
 #define NFC_ECC_MODE			(0xf << NFC_ECC_MODE_SHIFT)
-#define NFC_RANDOM_SEED         (0x7fff << 16))
+#define NFC_RANDOM_SEED         (0x7fff << 16)
 
 #define NFC_IRQ_MAJOR		    13
 /*cmd flag bit*/
@@ -194,8 +194,12 @@ void enable_random(void);
 void disable_random(void);
 void enable_ecc(int pipline);
 int check_ecc(int eblock_cnt);
+void set_ecc_mode(int mode);
 void disable_ecc(void);
 void _dma_config_start(__u32 rw, __u32 src_addr, __u32 dst_addr, __u32 len);
 __s32 _wait_dma_end(void);
+
+void nfc_read_page1k(uint32_t page_addr, void *buff);
+void nfc_write_page1k(uint32_t page_addr, void *buff);
 
 #endif
