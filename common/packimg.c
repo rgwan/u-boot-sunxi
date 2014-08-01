@@ -27,7 +27,8 @@ int packimg_read(nand_info_t *nand, uint32_t nand_off, uint32_t nand_size)
 
 	while (offs < nand_off + nand_size) {
 		size = 512;
-		err = nand_read_skip_bad(nand, offs, &size, (void *)buff);
+		err = nand_read_skip_bad(nand, offs, &size, NULL,
+					       nand->size, (void *)buff);
 		if (err) {
 			printf("nand read offset %x fail\n", offs);
 			return err;
@@ -45,7 +46,7 @@ int packimg_read(nand_info_t *nand, uint32_t nand_off, uint32_t nand_size)
 		// load all entries
 		for (i = 0; i < ph->nentry; i++) {
 			size = pe[i].size;
-			err = nand_read_skip_bad(nand, offs + pe[i].offset, &size, (void *)pe[i].ldaddr);
+			err = nand_read_skip_bad(nand, offs + pe[i].offset, &size, NULL, nand->size, (void *)pe[i].ldaddr);
 			if (err) {
 				printf("nand read offset %x size %x to %x fail\n",
 					   offs + pe[i].offset, pe[i].size, pe[i].ldaddr);

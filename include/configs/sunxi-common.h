@@ -160,7 +160,7 @@
 
 #define CONFIG_SYS_HZ			1000
 
-#define CONFIG_RAND_FUNCTION
+#define CONFIG_LIB_RAND
 
 /* baudrate */
 #define CONFIG_BAUDRATE			115200

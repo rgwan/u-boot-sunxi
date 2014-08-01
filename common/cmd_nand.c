@@ -475,7 +475,7 @@ static int erase_and_write_block(nand_info_t *nand, loff_t off, char *wbuff, cha
 	erase.mtd = nand;
 	erase.addr = off;
 	erase.len = nand->erasesize;
-	if (nand->erase(nand, &erase))
+	if (nand->_erase(nand, &erase))
 		goto bad_out;
 
 	/* skip write test */
@@ -488,7 +488,7 @@ static int erase_and_write_block(nand_info_t *nand, loff_t off, char *wbuff, cha
 			((unsigned int *)wbuff)[i] = rand();
 
 	/* write block */
-	err = nand->write(nand, off, nand->erasesize, &retlen, (void *)wbuff);
+	err = nand->_write(nand, off, nand->erasesize, &retlen, (void *)wbuff);
 	if (err || retlen != nand->erasesize) {
 		printf("write block %010llx failed %d\n", off, err);
 		goto bad_out;
@@ -499,7 +499,7 @@ static int erase_and_write_block(nand_info_t *nand, loff_t off, char *wbuff, cha
 		return 0;
 
 	/* read block */
-	err = nand->read(nand, off, nand->erasesize, &retlen, (void *)rbuff);
+	err = nand->_read(nand, off, nand->erasesize, &retlen, (void *)rbuff);
 	if ((err && err != -EUCLEAN) || retlen != nand->erasesize) {
 		printf("read block %010llx failed %d\n", off, err);
 		goto bad_out;
@@ -520,7 +520,7 @@ static int erase_and_write_block(nand_info_t *nand, loff_t off, char *wbuff, cha
 
 bad_out:
 	printf("bad block at %010llx\n", off);
-	nand->block_markbad(nand, off);
+	nand->_block_markbad(nand, off);
 	return -1;
 }
 
@@ -885,7 +885,7 @@ static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		if (skip_write)
 			pos++;
 
-		if (arg_off_size(argc - pos, argv + pos, &index, &block_start, &block_size)) {
+		if (arg_off_size(argc - pos, argv + pos, &index, &block_start, &block_size, &maxsize)) {
 			printf("invalid arguments\n");
 			return -EINVAL;
 		}
@@ -923,14 +923,14 @@ static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 				printf("check block at %010llx\n", block_start);
 
 			// check bad block
-			if (nand->block_isbad(nand, block_start)) {
+			if (nand->_block_isbad(nand, block_start)) {
 				printf("bad block at %010llx\n", block_start);
 				continue;
 			}
 
 			// save origin data
 			if (keep_data) {
-				err = nand->read(nand, block_start, nand->erasesize, &retlen, (void *)save_buffer);
+				err = nand->_read(nand, block_start, nand->erasesize, &retlen, (void *)save_buffer);
 				if ((err == 0 || err == -EUCLEAN) && (retlen == nand->erasesize))
 					data_saved = 1;
 			}
@@ -1019,7 +1019,7 @@ static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 			if (argc != pos)
 				goto usage;
 
-			if (arg_off_size(pos - 3, argv + 3, &index, &nand_off, &nand_size))
+			if (arg_off_size(pos - 3, argv + 3, &index, &nand_off, &nand_size, &maxsize))
 				goto usage;
 
 			return packimg_read(&nand_info[dev], nand_off, nand_size);
@@ -1029,7 +1029,7 @@ static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 			if (argc != pos + 2 && argc != pos + 3)
 				goto usage;
 
-			if (arg_off_size(pos - 3, argv + 3, &index, &nand_off, &nand_size))
+			if (arg_off_size(pos - 3, argv + 3, &index, &nand_off, &nand_size, &maxsize))
 				goto usage;
 
 			if (!str2long(argv[pos], &mem_off))

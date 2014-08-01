@@ -187,6 +187,7 @@ void sunxi_board_init(void)
 	printf(" %lu MiB\n", ramsize >> 20);
 	if (!ramsize)
 		hang();
+#endif
 
 #ifdef CONFIG_AXP209_POWER
 	power_failed = axp152_init();

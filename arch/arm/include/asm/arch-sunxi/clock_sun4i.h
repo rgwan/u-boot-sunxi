@@ -90,6 +90,8 @@ struct sunxi_ccm_reg {
 	u32 gmac_clk_cfg;	/* 0x164 */
 };
 
+unsigned int clock_get_pll5(void);
+
 /* apb1 bit field */
 #define APB1_CLK_SRC_OSC24M		(0x0 << 24)
 #define APB1_CLK_SRC_PLL6		(0x1 << 24)
