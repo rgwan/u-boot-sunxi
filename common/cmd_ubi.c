@@ -709,3 +709,4 @@ U_BOOT_CMD(
 	" size: specified in bytes\n"
 	" type: s[tatic] or d[ynamic] (default=dynamic)"
 );
+

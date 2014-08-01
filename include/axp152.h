@@ -9,3 +9,4 @@ int axp152_set_dcdc4(int mvolt);
 int axp152_set_ldo2(int mvolt);
 void axp152_poweroff(void);
 int axp152_init(void);
+

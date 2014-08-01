@@ -834,7 +834,7 @@ char *	strmhz(char *buf, unsigned long hz);
 #include <u-boot/crc.h>
 
 /* lib/rand.c */
-#if defined(CONFIG_LIB_RAND) || defined(CONFIG_LIB_HW_RAND)
+#if defined(CONFIG_LIB_RAND) || defined(CONFIG_LIB_HW_RAND) || defined(CONFIG_RAND_FUNCTION)
 #define RAND_MAX -1U
 void srand(unsigned int seed);
 unsigned int rand(void);

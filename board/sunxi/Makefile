@@ -83,3 +83,5 @@ obj-$(CONFIG_MERRII_M2)		+= dram_merrii_m2.o
 obj-$(CONFIG_OLIMEX_A13_SOM)		+= dram_olimex_a13_som.o
 obj-$(CONFIG_A20_OLINUXINO_L)   += dram_a20_olinuxino_l.o
 obj-$(CONFIG_A20_OLINUXINO_L2)   += dram_a20_olinuxino_l2.o
+obj-$(CONFIG_EM6000) +=  dram_em6000.o
+

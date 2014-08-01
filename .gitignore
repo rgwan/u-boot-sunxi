@@ -78,6 +78,7 @@ cscope.*
 /ctags
 /etags
 
+<<<<<<< HEAD
 # gnu global files
 GPATH
 GRTAGS
@@ -87,3 +88,14 @@ GTAGS
 *.orig
 *~
 \#*#
+=======
+# spl ais files
+/spl/*.ais
+
+# gtags file
+GTAGS
+GSYMS
+GPATH
+GRTAGS
+
+>>>>>>> nand/sunxi-current

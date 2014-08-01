@@ -2103,3 +2103,4 @@ U_BOOT_CMD(
 	"define flash/nand partitions", mtdparts_help_text
 );
 /***************************************************/
+

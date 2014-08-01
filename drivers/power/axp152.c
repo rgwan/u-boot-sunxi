@@ -110,3 +110,4 @@ int axp152_init(void)
 
 	return 0;
 }
+

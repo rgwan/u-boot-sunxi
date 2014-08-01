@@ -139,6 +139,7 @@ int writeenv(size_t offset, u_char *buf)
 			offset += blocksize;
 		} else {
 			char_ptr = &buf[amount_saved];
+			debug("nand write off=%x len=%x\n", offset, len);
 			if (nand_write(&nand_info[0], offset, &len, char_ptr))
 				return 1;
 
