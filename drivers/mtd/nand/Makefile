@@ -18,6 +18,7 @@ obj-$(CONFIG_SPL_NAND_LOAD) += nand_spl_load.o
 obj-$(CONFIG_SPL_NAND_ECC) += nand_ecc.o
 obj-$(CONFIG_SPL_NAND_BASE) += nand_base.o
 obj-$(CONFIG_SPL_NAND_INIT) += nand.o
+obj-$(CONFIG_NAND_SUNXI) += sunxi_nand_spl.o
 
 else # not spl
 
@@ -61,18 +62,14 @@ obj-$(CONFIG_NAND_PLAT) += nand_plat.o
 obj-$(CONFIG_NAND_DOCG4) += docg4.o
 obj-$(CONFIG_NAND_SUNXI) += sunxi_nand_common.o
 obj-$(CONFIG_NAND_SUNXI) += sunxi_nand_id.o
-ifdef CONFIG_SPL_BUILD
-obj-$(CONFIG_NAND_SUNXI) += sunxi_nand_spl.o
-else
 obj-$(CONFIG_NAND_SUNXI) += sunxi_nand.o
 obj-$(CONFIG_NAND_SUNXI) += sunxi_nand1k.o
-endif
+
 
 else  # minimal SPL drivers
 
 obj-$(CONFIG_NAND_FSL_ELBC) += fsl_elbc_spl.o
 obj-$(CONFIG_NAND_FSL_IFC) += fsl_ifc_spl.o
 obj-$(CONFIG_NAND_MXC) += mxc_nand_spl.o
-obj-$(CONFIG_NAND_SUNXI) += sunxi_nand_spl.o
 
 endif # drivers

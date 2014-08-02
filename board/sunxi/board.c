@@ -188,15 +188,6 @@ void sunxi_board_init(void)
 	if (!ramsize)
 		hang();
 #endif
-
-#ifdef CONFIG_AXP209_POWER
-	power_failed = axp152_init();
-	if(!power_failed){
-		power_failed |= axp152_set_dcdc2(1400);
-		clock_set_pll1(1008000000);
-		return;
-	}
-#endif
 	/*
 	 * Only clock up the CPU to full speed if we are reasonably
 	 * assured it's being powered with suitable core voltage
@@ -254,14 +245,5 @@ int misc_init_r(void)
 
 	return 0;
 }
-
-#ifdef CONFIG_SPL_OS_BOOT
-int spl_start_uboot(void)
-{
-	// start uboot when console has input
-	udelay(10);
-	return tstc();
-}
-#endif
 
 #endif

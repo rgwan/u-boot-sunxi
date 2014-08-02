@@ -39,7 +39,7 @@ u32 spl_boot_device(void)
 {
 #ifdef CONFIG_NAND
 	return BOOT_DEVICE_NAND;
-#elif CONFIG_MMC
+#elif defined(CONFIG_MMC)
 	return BOOT_DEVICE_MMC1;
 #else
 	return BOOT_DEVICE_NONE;
