@@ -51,6 +51,7 @@
 	model = "Mele I7 Quad top set box";
 	compatible = "mele,i7", "allwinner,sun6i-a31";
 
+
 	aliases {
 		serial0 = &uart0;
 	};
@@ -104,6 +105,15 @@
 	bus-width = <4>;
 	cd-gpios = <&pio 7 22 GPIO_ACTIVE_HIGH>; /* PH22 */
 	cd-inverted;
+	status = "okay";
+};
+
+&mmc2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&mmc2_pins_a>;
+	vmmc-supply = <&reg_vcc3v3>;
+	bus-width = <4>;
+	non-removable;
 	status = "okay";
 };
 

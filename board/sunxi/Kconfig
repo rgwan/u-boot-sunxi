@@ -280,6 +280,12 @@ config MMC_SUNXI_SLOT_EXTRA
 	slot or emmc on mmc1 - mmc3. Setting this to 1, 2 or 3 will enable
 	support for this.
 
+config MMC_SUNXI_SLOT
+	int "default boot mmc slot number"
+	default 0
+	---help---
+	sunxi always boot from slot 0, but you still can modify the default setting of mmc slot number.
+
 config SPL_NAND_SUPPORT
 	bool "SPL/NAND mode support"
 	depends on SPL
